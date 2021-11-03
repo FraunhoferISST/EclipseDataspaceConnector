@@ -25,7 +25,6 @@
     <div id="app">Loading...</div>
     <script>
       window.$docsify = {
-        repo: 'eclipse-dataspaceconnector/DataSpaceConnector',
         alias: {
           '.*?/changelog':
             'https://github.com/eclipse-dataspaceconnector/DataSpaceConnector/blob/main/CHANGELOG.md',
@@ -33,12 +32,14 @@
         },
         auto2top: true,
         coverpage: true,
-        onlyCover: true,
         loadSidebar: true,
-        subMaxLevel: 3,
         name: 'Dataspace Connector',
-        themeColor: '#f78e2c',
         notFoundPage: true,
+        onlyCover: true,
+        plantuml: {
+          skin: 'default',
+        },
+        repo: 'eclipse-dataspaceconnector/DataSpaceConnector',
         search: {
           noData: {
             '/': 'No results!',
@@ -49,6 +50,8 @@
           },
           depth: 6,
         },
+        subMaxLevel: 3,
+        themeColor: '#f78e2c',
       };
     </script>
     <script src="//cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
@@ -58,6 +61,8 @@
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-nginx.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-php.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/emoji.min.js"></script>
+    <script src="//unpkg.com/docsify-plantuml/dist/docsify-plantuml.min.js"></script>
+
   </body>
 
 </html>
