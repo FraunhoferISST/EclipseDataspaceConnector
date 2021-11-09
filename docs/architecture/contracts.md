@@ -8,7 +8,7 @@
 
 ## Offering
 
-The EDC connector is able to provide contract offers. This feature requires four different types of extensions:
+The EDC is able to provide contract offers. This feature requires four different types of extensions:
 
 - [Core Contract Extension](../../core/contract/README.md)
 - Extension that implements the **Asset Index**
@@ -20,7 +20,7 @@ The EDC connector is able to provide contract offers. This feature requires four
 
 ### Most important classes and interfaces
 
-- **Contract Offer Service**
+- **ContractOfferService**
     - may be used to query offers
     - core implementation
 - **Contract Offer Framework**
@@ -34,7 +34,7 @@ The EDC connector is able to provide contract offers. This feature requires four
 
 ### Prototypic Sequence for Contract Offer Creation
 
-![Offer Query](diagrams/offer-query.png)
+![Offer Query](diagram/offer-query.png)
 *The consumer connector requests a description, that contains the contract offers, from the provider.*
 
 ## Negotiation

@@ -6,26 +6,23 @@
 
 ---
 
-It is possible to configure the Eclipse Dataspace Connector. All configuration are retrieved by their key from an
-extension, that implements the Configuration Extension interface.
+It is possible to configure the Eclipse Dataspace Connector. All configurations are retrieved by 
+their key from an extension, that implements the `ConfigurationExtension` interface.
 
-Whether this configuration may happen when the application is running or only on start-up may vary for each
+Whether this configuration is applied at start-up or runtime of the application may vary for each
 configuration extension.
 
 ## Create new Setting
 
-Settings are identified by their key. When creation new setting please follow the best practices listed below.
+Settings are identified by their key. They are retrieved from the `ServiceExtensionContext` 
+interface. When creating new settings, please follow the **best practices** listed below.
 
-Settings are retrieved from the ServiceExtensionContext interface.
-
-**Best practices for Settings**:
-
-- setting keys start with _edc_
-- setting keys are defined in _private static final_ fields
-- setting fields are annotated with the _@EdcSetting_ marker interface
+- setting keys start with `edc`
+- setting keys are defined in `private static final` fields
+- setting fields are annotated with the `@EdcSetting` marker interface
 - settings have a valid default value
 
-**Example Setting**
+Example:
 
 ```java
 class ExampleSetting {
@@ -44,8 +41,9 @@ class ExampleSetting {
 
 ## Configuration Extension
 
-The integration of each configuration extension may vary. Please have a look at their corresponding README.md files.
+The integration of each configuration extension may vary. Please have a look at their corresponding
+`README.md` files.
 
-The following extensions implement the ConfigurationExtension interface.
+The following extensions implement the `ConfigurationExtension` interface.
 
 - [File System Configuration](../../extensions/filesystem/configuration-fs/README.md)

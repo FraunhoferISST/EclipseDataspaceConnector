@@ -1,4 +1,4 @@
-# Architecture Key Principles
+# Key Principles
 
 ## I. Fail-fast and Explicit Configuration
 
@@ -18,20 +18,20 @@
 ## III. Simplicity
 1. Avoid layers of indirection when they are not needed (e.g. "pass-through methods").
 
-### IV. Testing
+## IV. Testing
 1. All handlers and services should have dedicated unit tests with mocks used for dependencies.
 2. When appropriate, prefer composing services via the constructor so that dependencies can be mocked as opposed to instantiating dependencies directly, see `ProvisionManagerImpl`. 
    
-### V. Data Objects
+## V. Data Objects
 1. Do not create constructors that take many parameters; instead use the builder pattern. An example is `TransferProcess`.
 2. Note that the motivation behind use of builders is not for immutability (although that may be good in certain circumstances). Rather, it is to make code less error-prone and 
    simpler given the lack of named arguments and optional parameters in Java.
 
-### VI. Secrets
+## VI. Secrets
 1. Only store secrets in the `Vault` and do not hold them in objects that may be persisted to other stores.
 2. Do not log secrets or sensitive information.
 
-### VII. Extensions and Libraries
+## VII. Extensions and Libraries
 1. Extension modules contribute a feature to the runtime such as a service. 
 2. SPI modules define extensibility points in the runtime. There is a core SPI module that defines extensibility for essential runtime features. There are other SPI modules that 
    define extensibility points for optional features such as IDS.
@@ -40,11 +40,11 @@
 5. An Extension module may only reference other SPI modules and library modules.
 6. A library module may only reference other library modules.
 
-### VIII. Build
+## VIII. Build
 1. There should only be a root `gradle.properties` that defines dependency versions. Do not create separate gradle.properties files in a module.
 2. For external dependencies, do not reference the version directly. Instead, add an entry in `gradle.properties` so that it may be synchronized across the codebase.
 
-### IX. Handling Null Return Values
+## IX. Handling Null Return Values
 1. In certain situations, `null` may need to be returned from a method, passed as a parameter, or set on a field. Only use `Optional` if a method is part of a fluent API. 
    Since the runtime will rarely require this, the project standard is to use the `org.jetbrains.annotations.Nullable` and `org.jetbrains.annotations.NotNull` annotations. 
 

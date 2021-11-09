@@ -1,4 +1,5 @@
-# Refactorings for Architectural Alignment - Meeting Protocol
+# Refactorings for Architectural Alignment 
+_(Meeting Protocol)_
 
 1. Flatten `/request/handler` to `/handler`. Retain `/description` subpackage (seemingly minor but this created a lot of confusion).
 2. Rename `/http` to `/message` (minor, but easy to do)
@@ -18,24 +19,21 @@
 
    a. IdsId parse(String urn) - Can that be moved to the Description sub handler for dispatching? Also, just take the URI, get the scheme-specific part and tokenize it. Don't
    convert to string first.
-
    b. The enum type does not appear to offer any value if the `DescriptionRequestHandler` handles dispatching to sub handlers.  
    c. The id methods should be removed and handled by a `IdsTypeTransformer`.
-
-
-2. Method `handle(DescriptionRequestMessage descriptionRequestMessage, String payload)` - Why is payload a string, should it be a type (e.g. a materialized type or Void)? - Leave as string fro now
+   
+2. Method `handle(DescriptionRequestMessage descriptionRequestMessage, String payload)` - Why is payload a string, should it be a type (e.g. a materialized type or Void)? - Leave as string for now.
 
 
 ## Other
 
-1. gradle.properties should not be in ids-api-multipart-endpoint-v1 - there is one properties file with the info-model version in it in the root project (easy to do)
-2. Create an interface for ConnectorDescriptionService
-3. ContractOffer should use Unix Epoch longs instead of ZonedDateTime
-4. Security Profile should default to NONE
-5. ConnectorDescriptionRequestHandler should not return a null MultipartResponse:
-
-     ```
-      if (!isRequestingCurrentConnectorsDescription(descriptionRequestMessage)) {
-            return null;
-      }
+1. `gradle.properties` should not be in ids-api-multipart-endpoint-v1 - there is one properties file with the IDS InfoModel version in it in the root project (easy to do)
+2. Create an interface for `ConnectorDescriptionService`
+3. `ContractOffer` should use Unix Epoch longs instead of `ZonedDateTime`
+4. Security Profile should default to `NONE`
+5. `ConnectorDescriptionRequestHandler` should not return a null MultipartResponse:
+   ```java
+   if (!isRequestingCurrentConnectorsDescription(descriptionRequestMessage)) {
+       return null;
+   }
    ```
