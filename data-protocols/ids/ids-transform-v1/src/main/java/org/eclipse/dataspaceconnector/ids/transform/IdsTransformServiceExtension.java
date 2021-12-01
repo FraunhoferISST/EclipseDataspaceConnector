@@ -64,6 +64,7 @@ public class IdsTransformServiceExtension implements ServiceExtension {
                 new IdsArtifactToAssetTransformer(),
                 new IdsBinaryOperatorToOperatorTransformer(),
                 new IdsConstraintToConstraintTransformer(),
+                new IdsContractAgreementToContractAgreementTransformer(),
                 new IdsContractOfferToContractOfferTransformer(),
                 new IdsContractRequestToContractOfferTransformer(),
                 new IdsIdToUriTransformer(),
