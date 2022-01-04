@@ -37,7 +37,7 @@ class FsRsaPrivateKeyResolverTest {
     }
 
     @Test
-    public void verifyResolution_RSA() {
+    public void verifyResolution_Rsa() {
         assertNotNull(keyResolver.resolvePrivateKey("testkey", RSAPrivateKey.class));
     }
 
