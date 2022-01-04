@@ -9,12 +9,15 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
 package org.eclipse.dataspaceconnector.iam.oauth2.core;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import okhttp3.OkHttpClient;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.impl.DefaultJwtDecorator;
@@ -32,9 +35,10 @@ import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.ECPrivateKey;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -107,18 +111,32 @@ public class Oauth2Extension implements ServiceExtension {
         jwtDecoratorRegistry.register(defaultDecorator);
         context.registerService(JwtDecoratorRegistry.class, jwtDecoratorRegistry);
 
-        // for now, lets assume we have RSA Private keys
-        Supplier<JWSSigner> pkSuppplier = createRsaPrivateKeySupplier(configuration);
+        // supports RSA and EC private keys
+        Supplier<JWSSigner> pkSuppplier = createPrivateKeySupplier(configuration);
         IdentityService oauth2Service = new Oauth2ServiceImpl(configuration, pkSuppplier, client, jwtDecoratorRegistry, context.getTypeManager());
 
         context.registerService(IdentityService.class, oauth2Service);
     }
 
-    private static Supplier<JWSSigner> createRsaPrivateKeySupplier(Oauth2Configuration configuration) {
+    private static Supplier<JWSSigner> createPrivateKeySupplier(Oauth2Configuration configuration) {
         return () -> {
             var pkId = configuration.getPrivateKeyAlias();
-            var pk = configuration.getPrivateKeyResolver().resolvePrivateKey(pkId, RSAPrivateKey.class);
-            return pk == null ? null : new RSASSASigner(pk);
+            var pk = configuration.getPrivateKeyResolver().resolvePrivateKey(pkId, PrivateKey.class);
+
+            JWSSigner signer = null;
+            if (pk != null && "EC".equals(pk.getAlgorithm())) {
+                //supports ECDSA private key
+                try {
+                    signer = new ECDSASigner((ECPrivateKey) pk);
+                } catch (JOSEException e) {
+                    throw new EdcException("Failed to load JWSSigner for EC private key: " + e);
+                }
+            } else if (pk != null) {
+                //default: RSA private key
+                signer = new RSASSASigner(pk);
+            }
+
+            return signer;
         };
     }
 
