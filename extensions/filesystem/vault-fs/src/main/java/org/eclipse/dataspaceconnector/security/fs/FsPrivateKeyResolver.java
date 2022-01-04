@@ -23,12 +23,14 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.RSAPrivateKey;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Resolves a private key from a JKS keystore.
+ * Resolves a RSA or EC private key from a JKS keystore.
  */
 public class FsPrivateKeyResolver implements PrivateKeyResolver {
     private final Map<String, PrivateKey> privateKeyCache = new HashMap<>();
@@ -50,7 +52,7 @@ public class FsPrivateKeyResolver implements PrivateKeyResolver {
                     continue;
                 }
                 Key key = keyStore.getKey(alias, encodedPassword);
-                if ((key instanceof PrivateKey)) {
+                if ((key instanceof RSAPrivateKey || key instanceof ECPrivateKey)) {
                     privateKeyCache.put(alias, (PrivateKey) key);
                 }
             }
