@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
@@ -21,16 +22,16 @@ import org.jetbrains.annotations.Nullable;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.interfaces.RSAPrivateKey;
+import java.security.PrivateKey;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Resolves an RSA private key from a JKS keystore.
+ * Resolves a private key from a JKS keystore.
  */
 public class FsPrivateKeyResolver implements PrivateKeyResolver {
-    private final Map<String, RSAPrivateKey> privateKeyCache = new HashMap<>();
+    private final Map<String, PrivateKey> privateKeyCache = new HashMap<>();
 
     /**
      * Constructor.
@@ -49,8 +50,8 @@ public class FsPrivateKeyResolver implements PrivateKeyResolver {
                     continue;
                 }
                 Key key = keyStore.getKey(alias, encodedPassword);
-                if ((key instanceof RSAPrivateKey)) {
-                    privateKeyCache.put(alias, (RSAPrivateKey) key);
+                if ((key instanceof PrivateKey)) {
+                    privateKeyCache.put(alias, (PrivateKey) key);
                 }
             }
 
