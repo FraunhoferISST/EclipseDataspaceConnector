@@ -36,7 +36,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,8 +50,8 @@ class Oauth2ServiceImplTest {
     private static final String PUBLIC_CERTIFICATE_ALIAS = "cert-test";
     private static final String PROVIDER_AUDIENCE = "audience-test";
 
-    private Oauth2ServiceImpl authService;
-    private Supplier<JWSSigner> jwsSignerSupplier;
+    private Oauth2ServiceImpl   authService;
+    private JWSSigner jwsSigner;
 
     @Test
     void verifyNoAudienceToken() {
@@ -112,7 +111,7 @@ class Oauth2ServiceImplTest {
                 .generate();
 
         var pk = testKey.toPrivateKey();
-        jwsSignerSupplier = () -> new RSASSASigner(pk);
+        jwsSigner = new RSASSASigner(pk);
         PublicKeyResolver publicKeyResolverMock = mock(PublicKeyResolver.class);
         PrivateKeyResolver privateKeyResolverMock = mock(PrivateKeyResolver.class);
         CertificateResolver certificateResolverMock = mock(CertificateResolver.class);
@@ -128,7 +127,7 @@ class Oauth2ServiceImplTest {
                 .identityProviderKeyResolver(publicKeyResolverMock)
                 .build();
 
-        authService = new Oauth2ServiceImpl(configuration, jwsSignerSupplier, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager());
+        authService = new Oauth2ServiceImpl(configuration, jwsSigner, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager());
     }
 
     private SignedJWT createJwt(String aud, Date nbf, Date exp) {
@@ -140,7 +139,7 @@ class Oauth2ServiceImplTest {
 
         try {
             SignedJWT jwt = new SignedJWT(header, claimsSet);
-            jwt.sign(jwsSignerSupplier.get());
+            jwt.sign(jwsSigner);
             return jwt;
         } catch (JOSEException e) {
             throw new AssertionError(e);
