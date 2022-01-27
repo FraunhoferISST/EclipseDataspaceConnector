@@ -28,25 +28,35 @@ class Oauth2ValidationRule implements ValidationRule {
         // check audiences
         List<String> audiences = toVerify.getAudience();
         if (audiences.isEmpty()) {
-            errors.add("Missing audience in token claims");
+            errors.add("Required audience (aud) claim is missing in token");
         } else if (!audiences.contains(audience)) {
-            errors.add("Token audience did not match required audience: " + audience);
+            errors.add("Token audience (aud) claim did not contain connector audience: " + audience);
         }
 
         // check not before
         var notBefore = toVerify.getNotBeforeTime();
         if (notBefore == null) {
-            errors.add("Missing notBefore time in token claims");
+            errors.add("Required not before (nbf) claim is missing in token");
         } else if (nowUtc.isBefore(convertToUtcTime(notBefore))) {
-            errors.add("Token is not valid yet");
+            errors.add("Current date/time before the not before (nbf) claim in token");
         }
 
         // check expiration time
         Date expires = toVerify.getExpirationTime();
         if (expires == null) {
-            errors.add("Missing expiration time in token claims");
+            errors.add("Required expiration time (exp) claim is missing in token");
         } else if (nowUtc.isAfter(convertToUtcTime(expires))) {
-            errors.add("Token has expired");
+            errors.add("Token has expired (exp)");
+        }
+
+        // iat and exp integrity check
+        Date issuedAt = toVerify.getIssueTime();
+        if (issuedAt != null) {
+            if (issuedAt.toInstant().isAfter(expires.toInstant())) {
+                errors.add("Issued at (iat) claim is after expiration time (exp) claim in token");
+            } else if (nowUtc.isBefore(convertToUtcTime(issuedAt))) {
+                errors.add("Current date/time before issued at (iat) claim in token");
+            }
         }
 
         if (errors.isEmpty()) {

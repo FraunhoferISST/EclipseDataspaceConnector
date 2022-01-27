@@ -28,7 +28,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token is not valid yet");
+                .contains("Current date/time before the not before (nbf) claim in token");
     }
 
     @Test
@@ -42,7 +42,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing notBefore time in token claims");
+                .contains("Required not before (nbf) claim is missing in token");
     }
 
     @Test
@@ -57,7 +57,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token has expired");
+                .contains("Token has expired (exp)");
     }
 
     @Test
@@ -71,7 +71,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing expiration time in token claims");
+                .contains("Required expiration time (exp) claim is missing in token");
     }
 
     @Test
@@ -86,7 +86,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token audience did not match required audience: test-audience");
+                .contains("Token audience (aud) claim did not contain connector audience: test-audience");
     }
 
     @Test
@@ -100,7 +100,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing audience in token claims");
+                .contains("Required audience (aud) claim is missing in token");
     }
 
     @Test
