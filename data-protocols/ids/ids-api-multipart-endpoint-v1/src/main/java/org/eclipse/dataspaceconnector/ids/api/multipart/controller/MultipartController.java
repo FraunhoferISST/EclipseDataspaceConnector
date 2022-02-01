@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Daimler TSS GmbH - Initial API and Implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
@@ -16,6 +17,7 @@ package org.eclipse.dataspaceconnector.ids.api.multipart.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iais.eis.Connector;
 import de.fraunhofer.iais.eis.DynamicAttributeToken;
 import de.fraunhofer.iais.eis.Message;
 import jakarta.ws.rs.Consumes;
@@ -28,7 +30,9 @@ import org.eclipse.dataspaceconnector.ids.api.multipart.handler.Handler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.message.MultipartRequest;
 import org.eclipse.dataspaceconnector.ids.api.multipart.message.MultipartResponse;
 import org.eclipse.dataspaceconnector.spi.EdcException;
+import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
+import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -54,15 +58,18 @@ public class MultipartController {
     private static final String PAYLOAD = "payload";
 
     private final String connectorId;
+    private final Boolean validateReferring;
     private final List<Handler> multipartHandlers;
     private final ObjectMapper objectMapper;
     private final IdentityService identityService;
 
     public MultipartController(@NotNull String connectorId,
+                               @NotNull Boolean validateReferring,
                                @NotNull ObjectMapper objectMapper,
                                @NotNull IdentityService identityService,
                                @NotNull List<Handler> multipartHandlers) {
         this.connectorId = Objects.requireNonNull(connectorId);
+        this.validateReferring = Objects.requireNonNull(validateReferring);
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.identityService = Objects.requireNonNull(identityService);
         this.multipartHandlers = Objects.requireNonNull(multipartHandlers);
@@ -94,10 +101,15 @@ public class MultipartController {
             return Response.ok(createFormDataMultiPart(notAuthenticated(header, connectorId))).build();
         }
 
+        // Oauth2 token validation
         var verificationResult = identityService.verifyJwtToken(dynamicAttributeToken.getTokenValue());
+
         if (verificationResult == null) {
             return Response.ok(createFormDataMultiPart(notAuthenticated(header, connectorId))).build();
         }
+
+        // IDS specific token validation
+        verificationResult =  verifyTokenIds(verificationResult, header, payload);
 
         if (verificationResult.failed()) {
             return Response.ok(createFormDataMultiPart(notAuthorized(header, connectorId))).build();
@@ -152,5 +164,34 @@ public class MultipartController {
         } catch (JsonProcessingException e) {
             throw new EdcException(e);
         }
+    }
+
+    private Result<ClaimToken> verifyTokenIds(Result <ClaimToken> verificationResult, Message header, String payload) {
+        //referringConnector (DAT, optional) vs issuerConnector (Message, mandatory)
+        var referringConnector = verificationResult.getContent().getClaims().get("referringConnector");
+        var issuerConnector = header.getIssuerConnector();
+
+        if (issuerConnector == null) {
+            return Result.failure("Required issuerConnector is missing in token");
+        }
+
+        if (Boolean.TRUE.equals(validateReferring) && referringConnector != null && !referringConnector.equals(issuerConnector.toString())) {
+            return Result.failure("refferingConnector in token does not match issuerConnector in message");
+        }
+
+
+        //securityProfile (DAT, mandatory) vs securityProfile (Message, optional)
+        try {
+            var payloadSecurityProfile = objectMapper.readValue(payload, Connector.class).getSecurityProfile();
+            var tokenSecurityProfile = verificationResult.getContent().getClaims().get("securityProfile");
+
+            if (payloadSecurityProfile != null && !(payloadSecurityProfile.toString().equals(tokenSecurityProfile))) {
+                return Result.failure("securityProfile in token does not match securityProfile in payload");
+            }
+        } catch (Exception e) {
+            //Nothing to do, payload mostly no connector instance
+        }
+
+        return Result.success(verificationResult.getContent());
     }
 }

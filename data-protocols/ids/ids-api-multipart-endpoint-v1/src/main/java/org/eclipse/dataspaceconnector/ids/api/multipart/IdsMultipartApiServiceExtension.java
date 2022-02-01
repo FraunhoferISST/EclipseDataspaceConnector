@@ -9,7 +9,7 @@
  *
  *  Contributors:
  *       Daimler TSS GmbH - Initial API and Implementation
- *       Fraunhofer Institute for Software and Systems Engineering - add contract and notification message handlers
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
@@ -41,7 +41,6 @@ import org.eclipse.dataspaceconnector.ids.spi.service.ConnectorService;
 import org.eclipse.dataspaceconnector.ids.spi.transform.TransformerRegistry;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
-import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.ConsumerContractNegotiationManager;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.ProviderContractNegotiationManager;
@@ -50,6 +49,7 @@ import org.eclipse.dataspaceconnector.spi.contract.offer.ContractOfferService;
 import org.eclipse.dataspaceconnector.spi.contract.validation.ContractValidationService;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
 import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
@@ -70,6 +70,9 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     @EdcSetting
     public static final String EDC_IDS_ID = "edc.ids.id";
     public static final String DEFAULT_EDC_IDS_ID = "urn:connector:edc";
+
+    @EdcSetting
+    public static final String EDC_IDS_VALIDATION_REFERRINGCONNECTOR = "edc.ids.validation.referringconnector";
 
     private Monitor monitor;
     @Inject
@@ -113,6 +116,7 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     private void registerControllers(ServiceExtensionContext serviceExtensionContext) {
 
         String connectorId = resolveConnectorId(serviceExtensionContext);
+        Boolean validateReferring = resolveValidateReferring(serviceExtensionContext);
 
         // create description request handlers
         ArtifactDescriptionRequestHandler artifactDescriptionRequestHandler = new ArtifactDescriptionRequestHandler(monitor, connectorId, assetIndex, transformerRegistry);
@@ -157,7 +161,7 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         handlers.add(new ContractRejectionHandler(monitor, connectorId, providerNegotiationManager, consumerNegotiationManager));
 
         // create & register controller
-        MultipartController multipartController = new MultipartController(connectorId, objectMapper, identityService, handlers);
+        MultipartController multipartController = new MultipartController(connectorId, validateReferring, objectMapper, identityService, handlers);
         webService.registerController(multipartController);
     }
 
@@ -186,4 +190,7 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         return value;
     }
 
+    private Boolean resolveValidateReferring(@NotNull ServiceExtensionContext context) {
+        return Boolean.parseBoolean(context.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, null));
+    }
 }
