@@ -147,7 +147,8 @@ abstract class AbstractMultipartControllerIntegrationTest {
 
     protected DescriptionRequestMessage getDescriptionRequestMessage(IdsId idsId) {
         DescriptionRequestMessageBuilder builder = new DescriptionRequestMessageBuilder()
-                ._securityToken_(getDynamicAttributeToken());
+                ._securityToken_(getDynamicAttributeToken())
+                ._issuerConnector_(URI.create("issuerConnector"));
 
         if (idsId != null) {
             builder._requestedElement_(
@@ -160,6 +161,7 @@ abstract class AbstractMultipartControllerIntegrationTest {
         var message = new ContractRequestMessageBuilder()
                 ._correlationMessage_(URI.create("correlationId"))
                 ._securityToken_(getDynamicAttributeToken())
+                ._issuerConnector_(URI.create("issuerConnector"))
                 .build();
         message.setProperty("idsWebhookAddress", "http://someUrl");
         return message;
@@ -169,6 +171,7 @@ abstract class AbstractMultipartControllerIntegrationTest {
         return new ContractAgreementMessageBuilder()
                 ._correlationMessage_(URI.create("correlationId"))
                 ._securityToken_(getDynamicAttributeToken())
+                ._issuerConnector_(URI.create("issuerConnector"))
                 .build();
     }
 
@@ -176,6 +179,7 @@ abstract class AbstractMultipartControllerIntegrationTest {
         return new ContractRejectionMessageBuilder()
                 ._correlationMessage_(URI.create("correlationId"))
                 ._securityToken_(getDynamicAttributeToken())
+                ._issuerConnector_(URI.create("issuerConnector"))
                 .build();
     }
 
@@ -183,6 +187,7 @@ abstract class AbstractMultipartControllerIntegrationTest {
         return new ContractOfferMessageBuilder()
                 ._correlationMessage_(URI.create("correlationId"))
                 ._securityToken_(getDynamicAttributeToken())
+                ._issuerConnector_(URI.create("issuerConnector"))
                 .build();
     }
 

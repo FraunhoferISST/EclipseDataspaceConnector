@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 2020, 2021, 2022
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Contributors:
+ *       Fraunhofer Institute for Software and Systems Engineering
+ *
+ */
+
 package org.eclipse.dataspaceconnector.iam.oauth2.core.impl;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -28,7 +42,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token is not valid yet");
+                .contains("Current date/time before the not before (nbf) claim in token");
     }
 
     @Test
@@ -42,7 +56,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing notBefore time in token claims");
+                .contains("Required not before (nbf) claim is missing in token");
     }
 
     @Test
@@ -57,7 +71,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token has expired");
+                .contains("Token has expired (exp)");
     }
 
     @Test
@@ -71,7 +85,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing expiration time in token claims");
+                .contains("Required expiration time (exp) claim is missing in token");
     }
 
     @Test
@@ -86,7 +100,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Token audience did not match required audience: test-audience");
+                .contains("Token audience (aud) claim did not contain connector audience: test-audience");
     }
 
     @Test
@@ -100,7 +114,7 @@ class Oauth2ValidationRuleTest {
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
-                .contains("Missing audience in token claims");
+                .contains("Required audience (aud) claim is missing in token");
     }
 
     @Test
@@ -114,6 +128,36 @@ class Oauth2ValidationRuleTest {
         var result = rule.checkRule(claims, TEST_AUDIENCE);
 
         assertThat(result.succeeded()).isTrue();
+    }
+
+    @Test
+    void validationKoBecauseIssuedAtAfterExpires() {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .audience("test-audience")
+                .notBeforeTime(Date.from(now))
+                .expirationTime(Date.from(now.plusSeconds(60)))
+                .issueTime(Date.from(now.plusSeconds(65)))
+                .build();
+
+        var result = rule.checkRule(claims, TEST_AUDIENCE);
+
+        assertThat(result.succeeded()).isFalse();
+        assertThat(result.getFailureMessages()).hasSize(1).contains("Issued at (iat) claim is after expiration time (exp) claim in token");
+    }
+
+    @Test
+    void validationKoBecauseIssuedAtInFuture() {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .audience("test-audience")
+                .notBeforeTime(Date.from(now))
+                .expirationTime(Date.from(now.plusSeconds(60)))
+                .issueTime(Date.from(now.plusSeconds(10)))
+                .build();
+
+        var result = rule.checkRule(claims, TEST_AUDIENCE);
+
+        assertThat(result.succeeded()).isFalse();
+        assertThat(result.getFailureMessages()).hasSize(1).contains("Current date/time before issued at (iat) claim in token");
     }
 
     @BeforeEach
