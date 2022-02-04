@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 2020 - 2022
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Contributors:
+ *       Fraunhofer Institute for Software and Systems Engineering
+ *
+ */
+
 package org.eclipse.dataspaceconnector.iam.oauth2.core.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -31,24 +45,35 @@ public class Oauth2ValidationRule implements ValidationRule {
 
         List<String> audiences = toVerify.getAudience();
         if (audiences.isEmpty()) {
-            errors.add("Missing audience in token claims");
+            errors.add("Required audience (aud) claim is missing in token");
         } else if (!audiences.contains(audience)) {
-            errors.add("Token audience did not match required audience: " + audience);
+            errors.add("Token audience (aud) claim did not contain connector audience: " + audience);
         }
 
         var leewayNow = nowUtc.plusSeconds(configuration.getNotBeforeValidationLeeway());
         var notBefore = toVerify.getNotBeforeTime();
         if (notBefore == null) {
-            errors.add("Missing notBefore time in token claims");
+            errors.add("Required not before (nbf) claim is missing in token");
         } else if (leewayNow.isBefore(convertToUtcTime(notBefore))) {
-            errors.add("Token is not valid yet");
+            errors.add("Current date/time with leeway before the not before (nbf) claim in token");
         }
 
         Date expires = toVerify.getExpirationTime();
-        if (expires == null) {
-            errors.add("Missing expiration time in token claims");
+        var expiresSet = expires != null;
+        if (!expiresSet) {
+            errors.add("Required expiration time (exp) claim is missing in token");
         } else if (nowUtc.isAfter(convertToUtcTime(expires))) {
-            errors.add("Token has expired");
+            errors.add("Token has expired (exp)");
+        }
+
+        // iat and exp integrity check
+        Date issuedAt = toVerify.getIssueTime();
+        if (issuedAt != null) {
+            if (expiresSet && issuedAt.toInstant().isAfter(expires.toInstant())) {
+                errors.add("Issued at (iat) claim is after expiration time (exp) claim in token");
+            } else if (nowUtc.isBefore(convertToUtcTime(issuedAt))) {
+                errors.add("Current date/time before issued at (iat) claim in token");
+            }
         }
 
         if (errors.isEmpty()) {
