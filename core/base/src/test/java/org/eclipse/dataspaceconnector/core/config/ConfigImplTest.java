@@ -132,6 +132,47 @@ class ConfigImplTest {
     }
 
     @Test
+    void getBooleanConfig() {
+        var config = new ConfigImpl("", Map.of("key", "true"));
+
+        var value = config.getBoolean("key");
+
+        assertThat(value).isEqualTo(true);
+    }
+
+    @Test
+    void getBooleanShouldThrowExceptionIfKeyNotFoundAndNoDefaultDefined() {
+        var config = new ConfigImpl("", emptyMap());
+
+        assertThatThrownBy(() -> config.getBoolean("key")).isInstanceOf(EdcException.class);
+    }
+
+    @Test
+    void getBooleanShouldThrowExceptionIfValueIsNotValidBoolean() {
+        var config = new ConfigImpl("", Map.of("key", "not_a_boolean"));
+
+        assertThatThrownBy(() -> config.getBoolean("key")).isInstanceOf(EdcException.class);
+    }
+
+    @Test
+    void getBooleanShouldReturnDefaultIfKeyNotFound() {
+        var config = new ConfigImpl("", emptyMap());
+
+        var value = config.getBoolean("key", true);
+
+        assertThat(value).isEqualTo(true);
+    }
+
+    @Test
+    void getBooleanShouldReturnNullIfDefaultIsNull() {
+        var config = new ConfigImpl("", emptyMap());
+
+        var value = config.getBoolean("key", null);
+
+        assertThat(value).isEqualTo(null);
+    }
+
+    @Test
     void configPlusAnotherShouldReturnTheUnionOfTheEntriesOverwritingTheDuplicates() {
         var config1 = new ConfigImpl("", Map.of("key1", "value1", "key2", "value1"));
         var config2 = new ConfigImpl("", Map.of("key2", "value2", "key3", "value2"));

@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 package org.eclipse.dataspaceconnector.core.config;
@@ -85,6 +86,23 @@ public class ConfigImpl implements Config {
     }
 
     @Override
+    public Boolean getBoolean(String key) {
+        return getNotNullValue(key, this::getBoolean);
+    }
+
+    @Override
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        var value = getString(key, Objects.toString(defaultValue, null));
+        if (value == null) {
+            return null;
+        } else if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
+            throw new EdcException(format("Setting %s with value %s is not a valid boolean", absolutePathOf(key), value));
+        } else {
+            return Boolean.parseBoolean(value);
+        }
+    }
+
+    @Override
     public Config getConfig(String path) {
         String absolutePath = absolutePathOf(path);
         var filteredEntries = entries.entrySet().stream()
@@ -105,7 +123,7 @@ public class ConfigImpl implements Config {
 
     @Override
     public Stream<Config> partition() {
-        return getRelativeEntries().keySet().stream().map(it -> it.split("\\.")[0]).distinct().map(group -> getConfig(group));
+        return getRelativeEntries().keySet().stream().map(it -> it.split("\\.")[0]).distinct().map(this::getConfig);
     }
 
     @Override
@@ -173,5 +191,4 @@ public class ConfigImpl implements Config {
         String rootPath = Optional.of(this.rootPath).filter(it -> !it.isEmpty()).map(it -> it + ".").orElse("");
         return rootPath + key;
     }
-
 }
