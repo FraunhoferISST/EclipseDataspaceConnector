@@ -14,8 +14,6 @@
 
 package org.eclipse.dataspaceconnector.ids.api.multipart.identity;
 
-import java.net.URI;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.fraunhofer.iais.eis.DescriptionRequestMessage;
 import de.fraunhofer.iais.eis.DescriptionRequestMessageBuilder;
@@ -28,11 +26,12 @@ import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.net.URI;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TokenValidationTest {
     private IdentityService identityService;
@@ -44,8 +43,8 @@ class TokenValidationTest {
         objectMapper = new ObjectMapper();
         var tokenResult = TokenRepresentation.Builder.newInstance().token("token").build();
         var claimToken = ClaimToken.Builder.newInstance()
-           .claim("referringConnector", "issuerConnector")
-           .build();
+                .claim("referringConnector", "issuerConnector")
+                .build();
         identityService = mock(IdentityService.class);
         when(identityService.obtainClientCredentials(any())).thenReturn(Result.success(tokenResult));
         when(identityService.verifyJwtToken(any())).thenReturn(Result.success(claimToken));
