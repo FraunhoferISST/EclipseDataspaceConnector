@@ -53,15 +53,17 @@ public class TokenValidation {
             }
 
             // 2. IDS specific token validation
-            verificationResult = verifyTokenIds(verificationResult, header, payload);
+            verificationResult = verifyTokenIds(verificationResult.getContent(), header, payload);
 
             return verificationResult;
         }
     }
 
-    private Result<ClaimToken> verifyTokenIds(Result<ClaimToken> verificationResult, Message header, String payload) {
+    private Result<ClaimToken> verifyTokenIds(ClaimToken claimToken, Message header, String payload) {
+        var claims = claimToken.getClaims();
+
         //referringConnector (DAT, optional) vs issuerConnector (Message, mandatory)
-        var referringConnector = verificationResult.getContent().getClaims().get("referringConnector");
+        var referringConnector = claims.get("referringConnector");
         var issuerConnector = header.getIssuerConnector();
 
         if (issuerConnector == null) {
@@ -75,7 +77,7 @@ public class TokenValidation {
         //securityProfile (DAT, mandatory) vs securityProfile (Message, optional)
         try {
             var payloadSecurityProfile = objectMapper.readValue(payload, Connector.class).getSecurityProfile();
-            var tokenSecurityProfile = verificationResult.getContent().getClaims().get("securityProfile");
+            var tokenSecurityProfile = claims.get("securityProfile");
 
             if (payloadSecurityProfile != null && !payloadSecurityProfile.toString().equals(tokenSecurityProfile)) {
                 return Result.failure("securityProfile in token does not match securityProfile in payload");
@@ -84,6 +86,6 @@ public class TokenValidation {
             //Nothing to do, payload mostly no connector instance
         }
 
-        return Result.success(verificationResult.getContent());
+        return Result.success(claimToken);
     }
 }

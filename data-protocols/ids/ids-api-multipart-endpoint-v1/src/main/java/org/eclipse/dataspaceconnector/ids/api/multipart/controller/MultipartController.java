@@ -96,7 +96,7 @@ public class MultipartController {
 
         Result<ClaimToken> verificationResult = tokenValidation.validateToken(header, payload);
         if (verificationResult.failed()) {
-            monitor.info(format("MultipartController: Token validation failed %s", verificationResult.getFailure().getMessages()));
+            monitor.warning(format("MultipartController: Token validation failed %s", verificationResult.getFailure().getMessages()));
             return Response.ok(createFormDataMultiPart(notAuthenticated(header, connectorId))).build();
         }
 

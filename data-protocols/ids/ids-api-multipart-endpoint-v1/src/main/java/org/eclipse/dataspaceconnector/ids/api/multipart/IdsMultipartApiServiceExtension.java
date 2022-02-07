@@ -195,6 +195,6 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     }
 
     private Boolean resolveValidateReferring(@NotNull ServiceExtensionContext context) {
-        return Boolean.parseBoolean(context.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, null));
+        return context.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, false);
     }
 }

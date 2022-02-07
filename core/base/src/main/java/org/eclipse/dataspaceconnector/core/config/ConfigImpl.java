@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Bayerische Motoren Werke Aktiengesellschaft (BMW AG) - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 package org.eclipse.dataspaceconnector.core.config;
@@ -20,14 +21,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -87,6 +86,23 @@ public class ConfigImpl implements Config {
     }
 
     @Override
+    public Boolean getBoolean(String key) {
+        return getNotNullValue(key, this::getBoolean);
+    }
+
+    @Override
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        var value = getString(key, Objects.toString(defaultValue, null));
+        if (value == null) {
+            return null;
+        } else if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
+            throw new EdcException(format("Setting %s with value %s is not a valid boolean", absolutePathOf(key), value));
+        } else {
+            return Boolean.parseBoolean(value);
+        }
+    }
+
+    @Override
     public Config getConfig(String path) {
         String absolutePath = absolutePathOf(path);
         var filteredEntries = entries.entrySet().stream()
@@ -129,7 +145,7 @@ public class ConfigImpl implements Config {
     }
 
     public Stream<Config> partition() {
-        return this.getRelativeEntries().keySet().stream().map(it -> it.split("\\.")[0]).distinct().map(group -> this.getConfig(group));
+        return this.getRelativeEntries().keySet().stream().map(it -> it.split("\\.")[0]).distinct().map(this::getConfig);
     }
 
     private String removePrefix(String path, String rootPath) {
