@@ -157,7 +157,7 @@ public class Oauth2ServiceImpl implements IdentityService {
             var claimsSet = signedJwt.getJWTClaimsSet();
 
             var errors = validationRules.stream()
-                    .map(r -> r.checkRule(claimsSet, configuration.getProviderAudience()))
+                    .map(r -> r.checkRule(claimsSet))
                     .filter(Result::failed)
                     .map(Result::getFailureMessages)
                     .flatMap(Collection::stream)

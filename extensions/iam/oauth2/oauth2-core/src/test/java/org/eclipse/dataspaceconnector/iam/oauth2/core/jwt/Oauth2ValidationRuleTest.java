@@ -27,13 +27,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Oauth2ValidationRuleTest {
 
-    public static final String TEST_AUDIENCE = "test-audience";
     private final Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     private Oauth2ValidationRule rule;
 
     @BeforeEach
     public void setUp() {
-        var configuration = Oauth2Configuration.Builder.newInstance().build();
+        var configuration = Oauth2Configuration.Builder.newInstance().providerAudience("test-audience").build();
         rule = new Oauth2ValidationRule(configuration);
     }
 
@@ -45,7 +44,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -59,7 +58,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -74,7 +73,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.minusSeconds(10)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -88,7 +87,7 @@ class Oauth2ValidationRuleTest {
                 .notBeforeTime(Date.from(now))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -103,7 +102,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -117,7 +116,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -132,11 +131,12 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
         var configuration = Oauth2Configuration.Builder.newInstance()
+                .providerAudience("test-audience")
                 .notBeforeValidationLeeway(20)
                 .build();
         rule = new Oauth2ValidationRule(configuration);
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isTrue();
     }
@@ -149,7 +149,7 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isTrue();
     }
@@ -163,7 +163,7 @@ class Oauth2ValidationRuleTest {
                 .issueTime(Date.from(now.plusSeconds(65)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1).contains("Issued at (iat) claim is after expiration time (exp) claim in token");
@@ -178,7 +178,7 @@ class Oauth2ValidationRuleTest {
                 .issueTime(Date.from(now.plusSeconds(10)))
                 .build();
 
-        var result = rule.checkRule(claims, TEST_AUDIENCE);
+        var result = rule.checkRule(claims);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1).contains("Current date/time before issued at (iat) claim in token");

@@ -39,10 +39,9 @@ public class Oauth2ValidationRule implements ValidationRule {
      * Validates the JWT by checking the audience, nbf, and expiration. Accessible for testing.
      */
     @Override
-    public Result<JWTClaimsSet> checkRule(JWTClaimsSet toVerify, String audience) {
-        Instant nowUtc = Instant.now();
+    public Result<JWTClaimsSet> checkRule(JWTClaimsSet toVerify) {
         List<String> errors = new ArrayList<>();
-
+        String audience = configuration.getProviderAudience();
         List<String> audiences = toVerify.getAudience();
         if (audiences.isEmpty()) {
             errors.add("Required audience (aud) claim is missing in token");
@@ -50,6 +49,7 @@ public class Oauth2ValidationRule implements ValidationRule {
             errors.add("Token audience (aud) claim did not contain connector audience: " + audience);
         }
 
+        Instant nowUtc = Instant.now();
         var leewayNow = nowUtc.plusSeconds(configuration.getNotBeforeValidationLeeway());
         var notBefore = toVerify.getNotBeforeTime();
         if (notBefore == null) {
@@ -66,7 +66,6 @@ public class Oauth2ValidationRule implements ValidationRule {
             errors.add("Token has expired (exp)");
         }
 
-        // iat and exp integrity check
         Date issuedAt = toVerify.getIssueTime();
         if (issuedAt != null) {
             if (expiresSet && issuedAt.toInstant().isAfter(expires.toInstant())) {
