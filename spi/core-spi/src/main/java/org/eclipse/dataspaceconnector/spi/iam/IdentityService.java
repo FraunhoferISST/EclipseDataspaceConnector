@@ -9,13 +9,18 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
 package org.eclipse.dataspaceconnector.spi.iam;
 
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.Feature;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Obtains client security tokens from an identity provider.
@@ -34,9 +39,9 @@ public interface IdentityService {
     /**
      * Verifies a JWT bearer token.
      *
-     *  @param token    the token to verify
+     * @param token The token to verify.
+     * @param additional Optional additional information required by the validations independent of the token.
      *
      */
-    Result<ClaimToken> verifyJwtToken(String token);
-
+    Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional);
 }

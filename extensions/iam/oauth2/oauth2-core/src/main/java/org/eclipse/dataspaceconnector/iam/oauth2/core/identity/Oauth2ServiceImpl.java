@@ -31,7 +31,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
-import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.Oauth2ValidationRule;
+import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.IdsValidationRule;
+import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
@@ -91,7 +92,8 @@ public class Oauth2ServiceImpl implements IdentityService {
         this.tokenSigner = tokenSigner;
 
         List<ValidationRule> rules = new ArrayList<>();
-        rules.add(new Oauth2ValidationRule(this.configuration)); //OAuth2 validation must ALWAYS be done
+        rules.add(new Oauth2ValidationRule(this.configuration));
+        rules.add(new IdsValidationRule());
         rules.addAll(List.of(additionalValidationRules));
         validationRules = Collections.unmodifiableList(rules);
 
@@ -140,7 +142,7 @@ public class Oauth2ServiceImpl implements IdentityService {
     }
 
     @Override
-    public Result<ClaimToken> verifyJwtToken(String token) {
+    public Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional) {
         try {
             var signedJwt = SignedJWT.parse(token);
 
@@ -154,10 +156,8 @@ public class Oauth2ServiceImpl implements IdentityService {
                 return Result.failure("Token verification not successful");
             }
 
-            var claimsSet = signedJwt.getJWTClaimsSet();
-
             var errors = validationRules.stream()
-                    .map(r -> r.checkRule(claimsSet))
+                    .map(r -> r.checkRule(signedJwt, additional))
                     .filter(Result::failed)
                     .map(Result::getFailureMessages)
                     .flatMap(Collection::stream)
@@ -168,7 +168,7 @@ public class Oauth2ServiceImpl implements IdentityService {
             }
 
             var tokenBuilder = ClaimToken.Builder.newInstance();
-            claimsSet.getClaims().entrySet().stream()
+            signedJwt.getJWTClaimsSet().getClaims().entrySet().stream()
                             .map(entry -> Map.entry(entry.getKey(), Objects.toString(entry.getValue())))
                             .filter(entry -> entry.getValue() != null)
                             .forEach(entry -> tokenBuilder.claim(entry.getKey(), entry.getValue()));

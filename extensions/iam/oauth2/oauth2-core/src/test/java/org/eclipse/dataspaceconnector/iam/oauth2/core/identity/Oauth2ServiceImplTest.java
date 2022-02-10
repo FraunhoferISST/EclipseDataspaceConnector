@@ -83,7 +83,7 @@ class Oauth2ServiceImplTest {
     void verifyNoAudienceToken() {
         var jwt = createJwt(null, Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize());
+        var result = authService.verifyJwtToken(jwt.serialize(), null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -93,7 +93,7 @@ class Oauth2ServiceImplTest {
     void verifyInvalidAudienceToken() {
         var jwt = createJwt("different.audience", Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize());
+        var result = authService.verifyJwtToken(jwt.serialize(), null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -103,7 +103,7 @@ class Oauth2ServiceImplTest {
     void verifyInvalidAttemptUseNotBeforeToken() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().plusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize());
+        var result = authService.verifyJwtToken(jwt.serialize(), null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -113,7 +113,7 @@ class Oauth2ServiceImplTest {
     void verifyExpiredToken() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().minusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize());
+        var result = authService.verifyJwtToken(jwt.serialize(), null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -123,7 +123,7 @@ class Oauth2ServiceImplTest {
     void verifyValidJwt() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().minusSeconds(1000)), new Date(System.currentTimeMillis() + 1000000));
 
-        var result = authService.verifyJwtToken(jwt.serialize());
+        var result = authService.verifyJwtToken(jwt.serialize(), null);
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent().getClaims()).hasSize(3).containsKeys("aud", "nbf", "exp");

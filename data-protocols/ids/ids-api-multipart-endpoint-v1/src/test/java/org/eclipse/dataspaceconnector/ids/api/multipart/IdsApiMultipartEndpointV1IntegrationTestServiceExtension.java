@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -118,7 +119,7 @@ class IdsApiMultipartEndpointV1IntegrationTestServiceExtension implements Servic
         }
 
         @Override
-        public Result<ClaimToken> verifyJwtToken(String token) {
+        public Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional) {
             return Result.success(ClaimToken.Builder.newInstance().build());
         }
     }

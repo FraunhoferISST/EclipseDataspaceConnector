@@ -17,6 +17,8 @@ package org.eclipse.dataspaceconnector.ids.api.multipart.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.fraunhofer.iais.eis.Connector;
+import de.fraunhofer.iais.eis.DynamicAttributeToken;
 import de.fraunhofer.iais.eis.Message;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -25,11 +27,11 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.Handler;
-import org.eclipse.dataspaceconnector.ids.api.multipart.identity.TokenValidation;
 import org.eclipse.dataspaceconnector.ids.api.multipart.message.MultipartRequest;
 import org.eclipse.dataspaceconnector.ids.api.multipart.message.MultipartResponse;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
+import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
@@ -39,7 +41,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -58,29 +62,30 @@ public class MultipartController {
 
     private final Monitor monitor;
     private final String connectorId;
+    private final Boolean validateReferring;
     private final List<Handler> multipartHandlers;
     private final ObjectMapper objectMapper;
-    private final TokenValidation tokenValidation;
+    private final IdentityService identityService;
 
     public MultipartController(@NotNull Monitor monitor,
                                @NotNull String connectorId,
+                               @NotNull Boolean validateReferring,
                                @NotNull ObjectMapper objectMapper,
-                               @NotNull TokenValidation tokenValidation,
+                               @NotNull IdentityService identityService,
                                @NotNull List<Handler> multipartHandlers) {
         this.monitor = Objects.requireNonNull(monitor);
         this.connectorId = Objects.requireNonNull(connectorId);
+        this.validateReferring = Objects.requireNonNull(validateReferring);
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.multipartHandlers = Objects.requireNonNull(multipartHandlers);
-        this.tokenValidation = Objects.requireNonNull(tokenValidation);
+        this.identityService = Objects.requireNonNull(identityService);
     }
 
     @POST
     public Response request(@FormDataParam(HEADER) InputStream headerInputStream,
                             @FormDataParam(PAYLOAD) String payload) {
         if (headerInputStream == null) {
-            return Response.ok(
-                    createFormDataMultiPart(
-                            malformedMessage(null, connectorId))).build();
+            return Response.ok(createFormDataMultiPart(malformedMessage(null, connectorId))).build();
         }
 
         Message header;
@@ -94,7 +99,24 @@ public class MultipartController {
             return Response.ok(createFormDataMultiPart(malformedMessage(null, connectorId))).build();
         }
 
-        Result<ClaimToken> verificationResult = tokenValidation.validateToken(header, payload);
+        DynamicAttributeToken dynamicAttributeToken = header.getSecurityToken();
+        if (dynamicAttributeToken == null || dynamicAttributeToken.getTokenValue() == null) {
+            monitor.warning("MultipartController: Token is missing in header");
+            return Response.ok(createFormDataMultiPart(notAuthenticated(header, connectorId))).build();
+        }
+
+        Map<String, Object> additional = new HashMap<>();
+        additional.put("IdsValidationRule", true); //TODO: pattern for enabling disabling specific validationRules -> oauth2serviceImpl stream filter
+        additional.put("validateReferring", validateReferring); //TODO: make requirements for necessary fields transparent (additional infos needed for IdsValidationRule as not part of jwt claims)
+        additional.put("issuerConnector", header.getIssuerConnector());
+        try {
+            additional.put("securityProfile", objectMapper.readValue(payload, Connector.class).getSecurityProfile());
+        } catch (Exception e) {
+            //payload no connector instance, nothing to do
+        }
+
+        Result<ClaimToken> verificationResult = identityService.verifyJwtToken(dynamicAttributeToken.getTokenValue(), additional);
+
         if (verificationResult.failed()) {
             monitor.warning(format("MultipartController: Token validation failed %s", verificationResult.getFailure().getMessages()));
             return Response.ok(createFormDataMultiPart(notAuthenticated(header, connectorId))).build();
