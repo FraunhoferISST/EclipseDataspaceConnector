@@ -71,9 +71,6 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     public static final String EDC_IDS_ID = "edc.ids.id";
     public static final String DEFAULT_EDC_IDS_ID = "urn:connector:edc";
 
-    @EdcSetting
-    public static final String EDC_IDS_VALIDATION_REFERRINGCONNECTOR = "edc.ids.validation.referringconnector";
-
     private Monitor monitor;
     @Inject
     private WebService webService;
@@ -116,7 +113,6 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     private void registerControllers(ServiceExtensionContext serviceExtensionContext) {
 
         String connectorId = resolveConnectorId(serviceExtensionContext);
-        Boolean validateReferring = resolveValidateReferring(serviceExtensionContext);
 
         // create description request handlers
         ArtifactDescriptionRequestHandler artifactDescriptionRequestHandler = new ArtifactDescriptionRequestHandler(monitor, connectorId, assetIndex, transformerRegistry);
@@ -161,7 +157,7 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         handlers.add(new ContractRejectionHandler(monitor, connectorId, providerNegotiationManager, consumerNegotiationManager));
 
         // create & register controller
-        MultipartController multipartController = new MultipartController(monitor, connectorId, validateReferring, objectMapper, identityService, handlers);
+        MultipartController multipartController = new MultipartController(monitor, connectorId, objectMapper, identityService, handlers);
         webService.registerController(multipartController);
     }
 
@@ -188,9 +184,5 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         }
 
         return value;
-    }
-
-    private Boolean resolveValidateReferring(@NotNull ServiceExtensionContext context) {
-        return context.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, false);
     }
 }

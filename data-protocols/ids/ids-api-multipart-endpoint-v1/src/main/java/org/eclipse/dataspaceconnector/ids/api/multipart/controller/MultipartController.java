@@ -62,20 +62,17 @@ public class MultipartController {
 
     private final Monitor monitor;
     private final String connectorId;
-    private final Boolean validateReferring;
     private final List<Handler> multipartHandlers;
     private final ObjectMapper objectMapper;
     private final IdentityService identityService;
 
     public MultipartController(@NotNull Monitor monitor,
                                @NotNull String connectorId,
-                               @NotNull Boolean validateReferring,
                                @NotNull ObjectMapper objectMapper,
                                @NotNull IdentityService identityService,
                                @NotNull List<Handler> multipartHandlers) {
         this.monitor = Objects.requireNonNull(monitor);
         this.connectorId = Objects.requireNonNull(connectorId);
-        this.validateReferring = Objects.requireNonNull(validateReferring);
         this.objectMapper = Objects.requireNonNull(objectMapper);
         this.multipartHandlers = Objects.requireNonNull(multipartHandlers);
         this.identityService = Objects.requireNonNull(identityService);
@@ -106,8 +103,7 @@ public class MultipartController {
         }
 
         Map<String, Object> additional = new HashMap<>();
-        additional.put("IdsValidationRule", true); //TODO: pattern for enabling disabling specific validationRules -> oauth2serviceImpl stream filter
-        additional.put("validateReferring", validateReferring); //TODO: make requirements for necessary fields transparent (additional infos needed for IdsValidationRule as not part of jwt claims)
+        //TODO: make requirements for necessary fields transparent (additional infos needed for IdsValidationRule as not part of jwt claims)
         additional.put("issuerConnector", header.getIssuerConnector());
         try {
             additional.put("securityProfile", objectMapper.readValue(payload, Connector.class).getSecurityProfile());

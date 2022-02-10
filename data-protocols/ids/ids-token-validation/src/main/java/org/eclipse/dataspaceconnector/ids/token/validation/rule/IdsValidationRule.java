@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020 - 2022
+ *  Copyright (c) 2020 - 2022 Fraunhofer Institute for Software and Systems Engineering
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -12,7 +12,7 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.iam.oauth2.core.rule;
+package org.eclipse.dataspaceconnector.ids.token.validation.rule;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
@@ -24,20 +24,21 @@ import java.text.ParseException;
 import java.util.Map;
 
 public class IdsValidationRule implements ValidationRule {
+    private final boolean validateReferring;
+
+    public IdsValidationRule(boolean validateReferring) {
+        this.validateReferring = validateReferring;
+    }
+
     /**
      * Validates the JWT by checking extended IDS rules.
      */
     @Override
     public Result<SignedJWT> checkRule(SignedJWT jwt, @Nullable Map<String, Object> additional) {
-        if (additional != null && additional.containsKey("IdsValidationRule") && (Boolean) additional.get("IdsValidationRule")) {
+        if (additional != null) {
             var issuerConnector = additional.get("issuerConnector");
             if (issuerConnector == null) {
                 return Result.failure("Required issuerConnector is missing in message");
-            }
-
-            var validateReferring = additional.get("validateReferring");
-            if (validateReferring == null) {
-                throw new EdcException("Required setting for validateReferring is missing");
             }
 
             String securityProfile = null;
@@ -45,14 +46,14 @@ public class IdsValidationRule implements ValidationRule {
                 securityProfile = additional.get("securityProfile").toString();
             }
 
-            return verifyTokenIds(jwt, issuerConnector.toString(), (Boolean) validateReferring, securityProfile);
+            return verifyTokenIds(jwt, issuerConnector.toString(), securityProfile);
 
         } else {
-            return Result.success(jwt);
+            throw new EdcException("Missing required additional information for IDS token validation");
         }
     }
 
-    private Result<SignedJWT> verifyTokenIds(SignedJWT jwt, String issuerConnector, Boolean validateReferring, @Nullable String securityProfile) {
+    private Result<SignedJWT> verifyTokenIds(SignedJWT jwt, String issuerConnector, @Nullable String securityProfile) {
         try {
             var claims = jwt.getJWTClaimsSet().getClaims();
 

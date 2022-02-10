@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,7 +77,7 @@ class Oauth2ServiceImplTest {
                 .identityProviderKeyResolver(publicKeyResolverMock)
                 .build();
 
-        authService = new Oauth2ServiceImpl(configuration, jwsSigner, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager());
+        authService = new Oauth2ServiceImpl(configuration, jwsSigner, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager(), new LinkedList<>());
     }
 
     @Test

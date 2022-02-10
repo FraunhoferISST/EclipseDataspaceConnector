@@ -25,6 +25,7 @@ import org.eclipse.dataspaceconnector.iam.oauth2.core.identity.Oauth2ServiceImpl
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.DefaultJwtDecorator;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.JwtDecoratorRegistryImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
@@ -38,6 +39,8 @@ import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.interfaces.ECPrivateKey;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +86,8 @@ public class Oauth2Extension implements ServiceExtension {
 
     private ScheduledExecutorService executorService;
 
+    private List<ValidationRule> additionalValidationRules = new LinkedList<>();
+
     @Inject
     private OkHttpClient okHttpClient;
 
@@ -105,7 +110,7 @@ public class Oauth2Extension implements ServiceExtension {
         context.registerService(JwtDecoratorRegistry.class, jwtDecoratorRegistry);
 
         var tokenSigner = createTokenSigner(configuration);
-        var oauth2Service = new Oauth2ServiceImpl(configuration, tokenSigner, okHttpClient, jwtDecoratorRegistry, context.getTypeManager());
+        var oauth2Service = new Oauth2ServiceImpl(configuration, tokenSigner, okHttpClient, jwtDecoratorRegistry, context.getTypeManager(), additionalValidationRules);
 
         context.registerService(IdentityService.class, oauth2Service);
     }
@@ -122,6 +127,10 @@ public class Oauth2Extension implements ServiceExtension {
         if (executorService != null) {
             executorService.shutdownNow();
         }
+    }
+
+    public void setAdditionalValidationRule(ValidationRule additionalValidationRule) {
+        additionalValidationRules.add(additionalValidationRule);
     }
 
     private static JWSSigner createTokenSigner(Oauth2Configuration configuration) {

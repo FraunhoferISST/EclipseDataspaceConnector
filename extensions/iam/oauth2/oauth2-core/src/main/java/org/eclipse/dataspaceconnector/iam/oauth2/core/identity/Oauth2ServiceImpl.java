@@ -31,7 +31,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
-import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.IdsValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
@@ -65,13 +64,12 @@ public class Oauth2ServiceImpl implements IdentityService {
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     private final Oauth2Configuration configuration;
-
     private final OkHttpClient httpClient;
     private final TypeManager typeManager;
-    private final List<ValidationRule> validationRules;
     private final JWSSigner tokenSigner;
     private final JwtDecoratorRegistry jwtDecoratorRegistry;
     private final JWSAlgorithm jwsAlgorithm;
+    private final List<ValidationRule> validationRules;
 
     /**
      * Creates a new instance of the OAuth2 Service
@@ -84,7 +82,7 @@ public class Oauth2ServiceImpl implements IdentityService {
      * @param additionalValidationRules An optional list of {@link ValidationRule} that are evaluated <em>after</em> the
      *                                  standard OAuth2 validation
      */
-    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager, ValidationRule... additionalValidationRules) {
+    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager, List<ValidationRule> additionalValidationRules) {
         this.configuration = configuration;
         this.typeManager = typeManager;
         httpClient = client;
@@ -93,8 +91,7 @@ public class Oauth2ServiceImpl implements IdentityService {
 
         List<ValidationRule> rules = new ArrayList<>();
         rules.add(new Oauth2ValidationRule(this.configuration));
-        rules.add(new IdsValidationRule());
-        rules.addAll(List.of(additionalValidationRules));
+        rules.addAll(additionalValidationRules);
         validationRules = Collections.unmodifiableList(rules);
 
         if (tokenSigner instanceof ECDSASigner) {

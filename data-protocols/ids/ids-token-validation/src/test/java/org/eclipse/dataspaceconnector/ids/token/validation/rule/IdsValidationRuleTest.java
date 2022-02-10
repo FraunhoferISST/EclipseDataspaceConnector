@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020 - 2022
+ *  Copyright (c) 2020 - 2022 Fraunhofer Institute for Software and Systems Engineering
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -12,13 +12,12 @@
  *
  */
 
-package org.eclipse.dataspaceconnector.iam.oauth2.core.jwt;
+package org.eclipse.dataspaceconnector.ids.token.validation.rule;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.IdsValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,11 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class IdsValidationRuleTest {
 
     private IdsValidationRule rule;
-    private JWSHeader         jwsHeader;
+    private JWSHeader jwsHeader;
 
     @BeforeEach
     public void setUp() {
-        rule = new IdsValidationRule();
+        rule = new IdsValidationRule(false);
         jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).build();
     }
 
@@ -65,6 +64,6 @@ class IdsValidationRuleTest {
         var result = rule.checkRule(jwt, additional);
 
         assertThat(result.succeeded()).isFalse();
-        assertThat(result.getFailureMessages().contains("Required issuerConnector is missing in message"));
+        assertThat(result.getFailureMessages()).contains("Required issuerConnector is missing in message");
     }
 }
