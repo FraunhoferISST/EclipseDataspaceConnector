@@ -14,11 +14,11 @@
 
 package org.eclipse.dataspaceconnector.iam.oauth2.spi;
 
-import java.util.Map;
-
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @FunctionalInterface
 public interface ValidationRule {

@@ -15,12 +15,11 @@
 
 package org.eclipse.dataspaceconnector.spi.iam;
 
-import java.util.List;
-import java.util.Map;
-
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.Feature;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 /**
  * Obtains client security tokens from an identity provider.

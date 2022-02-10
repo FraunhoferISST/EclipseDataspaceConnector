@@ -14,14 +14,14 @@
 
 package org.eclipse.dataspaceconnector.iam.oauth2.core.rule;
 
-import java.text.ParseException;
-import java.util.Map;
-
 import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.jetbrains.annotations.Nullable;
+
+import java.text.ParseException;
+import java.util.Map;
 
 public class IdsValidationRule implements ValidationRule {
     /**
@@ -73,7 +73,7 @@ public class IdsValidationRule implements ValidationRule {
             } catch (Exception e) {
                 //Nothing to do, payload mostly no connector instance
             }
-        } catch(ParseException e) {
+        } catch (ParseException e) {
             throw new EdcException("IdsValidationRule: unable to parse SignedJWT (" + e.getMessage() + ")");
         }
 
