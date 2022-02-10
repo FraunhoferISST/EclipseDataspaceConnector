@@ -94,7 +94,7 @@ abstract class DecentralizedIdentityServiceTest {
 
         var token = jwt.serialize();
 
-        var result = identityService.verifyJwtToken(token);
+        var result = identityService.verifyJwtToken(token, null);
 
         assertTrue(result.succeeded());
         assertEquals("eu", result.getContent().getClaims().get("region"));
