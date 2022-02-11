@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
@@ -18,8 +19,10 @@ import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.Map;
 
 public class MockIdentityService implements IdentityService {
     private final String region;
@@ -38,7 +41,7 @@ public class MockIdentityService implements IdentityService {
     }
 
     @Override
-    public Result<ClaimToken> verifyJwtToken(String token) {
+    public Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional) {
         switch (token) {
             case "mock-eu":
                 return Result.success(ClaimToken.Builder.newInstance().claim("region", "eu").build());

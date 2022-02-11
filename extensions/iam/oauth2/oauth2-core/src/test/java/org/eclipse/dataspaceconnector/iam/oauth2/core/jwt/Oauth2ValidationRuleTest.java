@@ -14,8 +14,12 @@
 
 package org.eclipse.dataspaceconnector.iam.oauth2.core.jwt;
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
+import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,11 +33,13 @@ class Oauth2ValidationRuleTest {
 
     private final Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
     private Oauth2ValidationRule rule;
+    private JWSHeader jwsHeader;
 
     @BeforeEach
     public void setUp() {
         var configuration = Oauth2Configuration.Builder.newInstance().providerAudience("test-audience").build();
         rule = new Oauth2ValidationRule(configuration);
+        jwsHeader = new JWSHeader.Builder(JWSAlgorithm.RS256).build();
     }
 
     @Test
@@ -44,7 +50,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -58,7 +65,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -73,7 +81,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.minusSeconds(10)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -87,7 +96,8 @@ class Oauth2ValidationRuleTest {
                 .notBeforeTime(Date.from(now))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -102,7 +112,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -116,7 +127,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1)
@@ -136,7 +148,8 @@ class Oauth2ValidationRuleTest {
                 .build();
         rule = new Oauth2ValidationRule(configuration);
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isTrue();
     }
@@ -149,7 +162,8 @@ class Oauth2ValidationRuleTest {
                 .expirationTime(Date.from(now.plusSeconds(600)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isTrue();
     }
@@ -163,7 +177,8 @@ class Oauth2ValidationRuleTest {
                 .issueTime(Date.from(now.plusSeconds(65)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1).contains("Issued at (iat) claim is after expiration time (exp) claim in token");
@@ -178,7 +193,8 @@ class Oauth2ValidationRuleTest {
                 .issueTime(Date.from(now.plusSeconds(10)))
                 .build();
 
-        var result = rule.checkRule(claims);
+        var jwt = new SignedJWT(jwsHeader, claims);
+        var result = rule.checkRule(jwt, null);
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).hasSize(1).contains("Current date/time before issued at (iat) claim in token");

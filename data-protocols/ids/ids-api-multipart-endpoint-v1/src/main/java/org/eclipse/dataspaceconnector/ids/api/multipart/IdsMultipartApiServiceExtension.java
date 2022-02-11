@@ -33,7 +33,6 @@ import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.Conn
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.DataCatalogDescriptionRequestHandler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.RepresentationDescriptionRequestHandler;
 import org.eclipse.dataspaceconnector.ids.api.multipart.handler.description.ResourceDescriptionRequestHandler;
-import org.eclipse.dataspaceconnector.ids.api.multipart.identity.TokenValidation;
 import org.eclipse.dataspaceconnector.ids.spi.IdsId;
 import org.eclipse.dataspaceconnector.ids.spi.IdsIdParser;
 import org.eclipse.dataspaceconnector.ids.spi.IdsType;
@@ -71,9 +70,6 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     @EdcSetting
     public static final String EDC_IDS_ID = "edc.ids.id";
     public static final String DEFAULT_EDC_IDS_ID = "urn:connector:edc";
-
-    @EdcSetting
-    public static final String EDC_IDS_VALIDATION_REFERRINGCONNECTOR = "edc.ids.validation.referringconnector";
 
     private Monitor monitor;
     @Inject
@@ -117,7 +113,6 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
     private void registerControllers(ServiceExtensionContext serviceExtensionContext) {
 
         String connectorId = resolveConnectorId(serviceExtensionContext);
-        Boolean validateReferring = resolveValidateReferring(serviceExtensionContext);
 
         // create description request handlers
         ArtifactDescriptionRequestHandler artifactDescriptionRequestHandler = new ArtifactDescriptionRequestHandler(monitor, connectorId, assetIndex, transformerRegistry);
@@ -161,11 +156,8 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         handlers.add(new ContractOfferHandler(monitor, connectorId, objectMapper, providerNegotiationManager, consumerNegotiationManager));
         handlers.add(new ContractRejectionHandler(monitor, connectorId, providerNegotiationManager, consumerNegotiationManager));
 
-        // create token validation for DAT
-        TokenValidation tokenValidation = new TokenValidation(validateReferring, objectMapper, identityService);
-
         // create & register controller
-        MultipartController multipartController = new MultipartController(monitor, connectorId, objectMapper, tokenValidation, handlers);
+        MultipartController multipartController = new MultipartController(monitor, connectorId, objectMapper, identityService, handlers);
         webService.registerController(multipartController);
     }
 
@@ -192,9 +184,5 @@ public final class IdsMultipartApiServiceExtension implements ServiceExtension {
         }
 
         return value;
-    }
-
-    private Boolean resolveValidateReferring(@NotNull ServiceExtensionContext context) {
-        return context.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, false);
     }
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2020, 2021 Microsoft Corporation
+ *  Copyright (c) 2020 - 2022 Microsoft Corporation
  *
  *  This program and the accompanying materials are made available under the
  *  terms of the Apache License, Version 2.0 which is available at
@@ -31,12 +31,12 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
-import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.Oauth2ValidationRule;
+import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2Service;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
-import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
@@ -45,9 +45,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,20 +55,20 @@ import java.util.stream.Collectors;
 /**
  * Implements the OAuth2 client credentials flow and bearer token validation.
  */
-public class Oauth2ServiceImpl implements IdentityService {
+public class Oauth2ServiceImpl implements Oauth2Service {
 
     private static final String GRANT_TYPE = "client_credentials";
     private static final String ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
 
     private final Oauth2Configuration configuration;
-
     private final OkHttpClient httpClient;
     private final TypeManager typeManager;
-    private final List<ValidationRule> validationRules;
     private final JWSSigner tokenSigner;
     private final JwtDecoratorRegistry jwtDecoratorRegistry;
     private final JWSAlgorithm jwsAlgorithm;
+
+    private List<ValidationRule> validationRules;
 
     /**
      * Creates a new instance of the OAuth2 Service
@@ -80,26 +78,27 @@ public class Oauth2ServiceImpl implements IdentityService {
      * @param client                    Http client
      * @param jwtDecoratorRegistry      Registry containing the decorator for build the JWT
      * @param typeManager               Type manager
-     * @param additionalValidationRules An optional list of {@link ValidationRule} that are evaluated <em>after</em> the
-     *                                  standard OAuth2 validation
      */
-    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager, ValidationRule... additionalValidationRules) {
+    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager) {
         this.configuration = configuration;
         this.typeManager = typeManager;
         httpClient = client;
         this.jwtDecoratorRegistry = jwtDecoratorRegistry;
         this.tokenSigner = tokenSigner;
 
-        List<ValidationRule> rules = new ArrayList<>();
-        rules.add(new Oauth2ValidationRule(this.configuration)); //OAuth2 validation must ALWAYS be done
-        rules.addAll(List.of(additionalValidationRules));
-        validationRules = Collections.unmodifiableList(rules);
+        //OAuth2 validation must ALWAYS be done
+        validationRules = List.of(new Oauth2ValidationRule(this.configuration));
 
         if (tokenSigner instanceof ECDSASigner) {
             jwsAlgorithm = JWSAlgorithm.ES256;
         } else {
             jwsAlgorithm = JWSAlgorithm.RS256;
         }
+    }
+
+    @Override
+    public void addAdditionalValidationRule(ValidationRule additionalValidationRule) {
+        validationRules.add(additionalValidationRule);
     }
 
     @Override
@@ -140,7 +139,7 @@ public class Oauth2ServiceImpl implements IdentityService {
     }
 
     @Override
-    public Result<ClaimToken> verifyJwtToken(String token) {
+    public Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional) {
         try {
             var signedJwt = SignedJWT.parse(token);
 
@@ -154,10 +153,8 @@ public class Oauth2ServiceImpl implements IdentityService {
                 return Result.failure("Token verification not successful");
             }
 
-            var claimsSet = signedJwt.getJWTClaimsSet();
-
             var errors = validationRules.stream()
-                    .map(r -> r.checkRule(claimsSet))
+                    .map(r -> r.checkRule(signedJwt, additional))
                     .filter(Result::failed)
                     .map(Result::getFailureMessages)
                     .flatMap(Collection::stream)
@@ -168,10 +165,10 @@ public class Oauth2ServiceImpl implements IdentityService {
             }
 
             var tokenBuilder = ClaimToken.Builder.newInstance();
-            claimsSet.getClaims().entrySet().stream()
-                            .map(entry -> Map.entry(entry.getKey(), Objects.toString(entry.getValue())))
-                            .filter(entry -> entry.getValue() != null)
-                            .forEach(entry -> tokenBuilder.claim(entry.getKey(), entry.getValue()));
+            signedJwt.getJWTClaimsSet().getClaims().entrySet().stream()
+                     .map(entry -> Map.entry(entry.getKey(), Objects.toString(entry.getValue())))
+                     .filter(entry -> entry.getValue() != null)
+                     .forEach(entry -> tokenBuilder.claim(entry.getKey(), entry.getValue()));
 
             return Result.success(tokenBuilder.build());
 

@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
+ *       Fraunhofer Institute for Software and Systems Engineering
  *
  */
 
@@ -35,10 +36,12 @@ import org.eclipse.dataspaceconnector.spi.transfer.flow.DataFlowManager;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.message.RemoteMessage;
 import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataRequest;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -128,7 +131,7 @@ public class EndToEndTest {
                 }
 
                 @Override
-                public Result<ClaimToken> verifyJwtToken(String token) {
+                public Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional) {
                     return Result.success(ClaimToken.Builder.newInstance().build());
                 }
             });

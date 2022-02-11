@@ -14,17 +14,20 @@
 
 package org.eclipse.dataspaceconnector.iam.oauth2.spi;
 
-import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.eclipse.dataspaceconnector.spi.result.Result;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 
 @FunctionalInterface
 public interface ValidationRule {
-
     /**
      * Rule that a token must satisfy in order to be valid.
      *
-     * @param toVerify The Claims to verify.
+     * @param toVerify The jwt to verify.
+     * @param additional Optional additional information required by the validations independent of the token.
      * @return ValidationRuleResult
      */
-    Result<JWTClaimsSet> checkRule(JWTClaimsSet toVerify);
+    Result<SignedJWT> checkRule(SignedJWT toVerify, @Nullable Map<String, Object> additional);
 }
