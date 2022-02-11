@@ -25,6 +25,7 @@ import org.eclipse.dataspaceconnector.iam.oauth2.core.identity.Oauth2ServiceImpl
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.DefaultJwtDecorator;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.jwt.JwtDecoratorRegistryImpl;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2Service;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.EdcSetting;
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
@@ -108,6 +109,7 @@ public class Oauth2Extension implements ServiceExtension {
         var oauth2Service = new Oauth2ServiceImpl(configuration, tokenSigner, okHttpClient, jwtDecoratorRegistry, context.getTypeManager());
 
         context.registerService(IdentityService.class, oauth2Service);
+        context.registerService(Oauth2Service.class, oauth2Service);
     }
 
     @Override
