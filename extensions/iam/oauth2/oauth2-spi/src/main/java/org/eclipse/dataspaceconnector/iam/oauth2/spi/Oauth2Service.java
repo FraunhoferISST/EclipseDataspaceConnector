@@ -16,7 +16,7 @@ package org.eclipse.dataspaceconnector.iam.oauth2.spi;
 
 import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 
-public interface Oauth2ServiceInterface extends IdentityService {
+public interface Oauth2Service extends IdentityService {
     /**
      * Dynamically add new validation rules to the extension at runtime.
      */

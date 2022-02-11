@@ -33,7 +33,7 @@ import okhttp3.ResponseBody;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
-import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2ServiceInterface;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2Service;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 /**
  * Implements the OAuth2 client credentials flow and bearer token validation.
  */
-public class Oauth2ServiceImpl implements Oauth2ServiceInterface {
+public class Oauth2ServiceImpl implements Oauth2Service {
 
     private static final String GRANT_TYPE = "client_credentials";
     private static final String ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
