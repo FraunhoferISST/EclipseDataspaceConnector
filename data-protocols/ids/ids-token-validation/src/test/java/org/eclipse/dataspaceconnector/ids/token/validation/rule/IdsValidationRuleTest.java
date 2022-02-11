@@ -43,7 +43,6 @@ class IdsValidationRuleTest {
 
         Map<String, Object> additional = new HashMap<>();
         additional.put("IdsValidationRule", true);
-        additional.put("validateReferring", false);
         additional.put("issuerConnector", "issuerConnector");
 
         var jwt = new SignedJWT(jwsHeader, claims);
@@ -58,7 +57,6 @@ class IdsValidationRuleTest {
 
         Map<String, Object> additional = new HashMap<>();
         additional.put("IdsValidationRule", true);
-        additional.put("validateReferring", false);
 
         var jwt = new SignedJWT(jwsHeader, claims);
         var result = rule.checkRule(jwt, additional);

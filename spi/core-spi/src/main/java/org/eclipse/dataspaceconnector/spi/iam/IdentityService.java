@@ -19,6 +19,7 @@ import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.system.Feature;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -43,4 +44,14 @@ public interface IdentityService {
      *
      */
     Result<ClaimToken> verifyJwtToken(String token, @Nullable Map<String, Object> additional);
+
+    /**
+     * Verifies a JWT bearer token.
+     *
+     * @param token The token to verify.
+     *
+     */
+    default Result<ClaimToken> verifyJwtToken(String token) {
+        return verifyJwtToken(token, new HashMap<>());
+    }
 }

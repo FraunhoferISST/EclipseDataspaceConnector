@@ -13,4 +13,3 @@ All content reflects the current state of discussion, not final decisions.
 | Key |  Description |
 |:---|:---|
 | edc.ids.id | The ID of the connector (e.g. urn:connector:edc-connector-24) |
-| edc.ids.validation.referringconnector | Validate DAT referringConnector vs IDS-Message issuerConnector (true/false, default false [not enabled]) |

@@ -129,7 +129,7 @@ public class Oauth2Extension implements ServiceExtension {
         }
     }
 
-    public void setAdditionalValidationRule(ValidationRule additionalValidationRule) {
+    public void addAdditionalValidationRule(ValidationRule additionalValidationRule) {
         additionalValidationRules.add(additionalValidationRule);
     }
 

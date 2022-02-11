@@ -49,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,10 +67,10 @@ public class Oauth2ServiceImpl implements IdentityService {
     private final Oauth2Configuration configuration;
     private final OkHttpClient httpClient;
     private final TypeManager typeManager;
+    private final List<ValidationRule> validationRules;
     private final JWSSigner tokenSigner;
     private final JwtDecoratorRegistry jwtDecoratorRegistry;
     private final JWSAlgorithm jwsAlgorithm;
-    private final List<ValidationRule> validationRules;
 
     /**
      * Creates a new instance of the OAuth2 Service
@@ -79,7 +80,20 @@ public class Oauth2ServiceImpl implements IdentityService {
      * @param client                    Http client
      * @param jwtDecoratorRegistry      Registry containing the decorator for build the JWT
      * @param typeManager               Type manager
-     * @param additionalValidationRules An optional list of {@link ValidationRule} that are evaluated <em>after</em> the
+     */
+    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager) {
+        this(configuration, tokenSigner, client, jwtDecoratorRegistry, typeManager, new LinkedList<>());
+    }
+
+    /**
+     * Creates a new instance of the OAuth2 Service
+     *
+     * @param configuration             The configuration
+     * @param tokenSigner               A {@link JWSSigner} instance.
+     * @param client                    Http client
+     * @param jwtDecoratorRegistry      Registry containing the decorator for build the JWT
+     * @param typeManager               Type manager
+     * @param additionalValidationRules A list of {@link ValidationRule} that are evaluated <em>after</em> the
      *                                  standard OAuth2 validation
      */
     public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager, List<ValidationRule> additionalValidationRules) {
@@ -90,7 +104,7 @@ public class Oauth2ServiceImpl implements IdentityService {
         this.tokenSigner = tokenSigner;
 
         List<ValidationRule> rules = new ArrayList<>();
-        rules.add(new Oauth2ValidationRule(this.configuration));
+        rules.add(new Oauth2ValidationRule(this.configuration)); //OAuth2 validation must ALWAYS be done
         rules.addAll(additionalValidationRules);
         validationRules = Collections.unmodifiableList(rules);
 

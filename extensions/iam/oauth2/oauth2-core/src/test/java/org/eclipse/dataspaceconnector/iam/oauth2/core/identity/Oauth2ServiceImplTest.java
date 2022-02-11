@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,14 +76,14 @@ class Oauth2ServiceImplTest {
                 .identityProviderKeyResolver(publicKeyResolverMock)
                 .build();
 
-        authService = new Oauth2ServiceImpl(configuration, jwsSigner, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager(), new LinkedList<>());
+        authService = new Oauth2ServiceImpl(configuration, jwsSigner, new OkHttpClient.Builder().build(), new JwtDecoratorRegistryImpl(), new TypeManager());
     }
 
     @Test
     void verifyNoAudienceToken() {
         var jwt = createJwt(null, Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize(), null);
+        var result = authService.verifyJwtToken(jwt.serialize());
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -94,7 +93,7 @@ class Oauth2ServiceImplTest {
     void verifyInvalidAudienceToken() {
         var jwt = createJwt("different.audience", Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize(), null);
+        var result = authService.verifyJwtToken(jwt.serialize());
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -104,7 +103,7 @@ class Oauth2ServiceImplTest {
     void verifyInvalidAttemptUseNotBeforeToken() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().plusSeconds(1000)), Date.from(Instant.now().plusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize(), null);
+        var result = authService.verifyJwtToken(jwt.serialize());
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -114,7 +113,7 @@ class Oauth2ServiceImplTest {
     void verifyExpiredToken() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().minusSeconds(1000)), Date.from(Instant.now().minusSeconds(1000)));
 
-        var result = authService.verifyJwtToken(jwt.serialize(), null);
+        var result = authService.verifyJwtToken(jwt.serialize());
 
         assertThat(result.succeeded()).isFalse();
         assertThat(result.getFailureMessages()).isNotEmpty();
@@ -124,7 +123,7 @@ class Oauth2ServiceImplTest {
     void verifyValidJwt() {
         var jwt = createJwt(PROVIDER_AUDIENCE, Date.from(Instant.now().minusSeconds(1000)), new Date(System.currentTimeMillis() + 1000000));
 
-        var result = authService.verifyJwtToken(jwt.serialize(), null);
+        var result = authService.verifyJwtToken(jwt.serialize());
 
         assertThat(result.succeeded()).isTrue();
         assertThat(result.getContent().getClaims()).hasSize(3).containsKeys("aud", "nbf", "exp");

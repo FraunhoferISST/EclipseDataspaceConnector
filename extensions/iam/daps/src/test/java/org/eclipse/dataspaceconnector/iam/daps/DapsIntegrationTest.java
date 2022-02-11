@@ -25,9 +25,7 @@ import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.security.CertificateResolver;
 import org.eclipse.dataspaceconnector.spi.security.PrivateKeyResolver;
 import org.eclipse.dataspaceconnector.spi.security.Vault;
-import org.eclipse.dataspaceconnector.spi.system.Config;
 import org.eclipse.dataspaceconnector.spi.system.ConfigurationExtension;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,7 +85,7 @@ class DapsIntegrationTest {
 
         assertThat(tokenResult.succeeded()).isTrue();
 
-        var verificationResult = identityService.verifyJwtToken(tokenResult.getContent().getToken(), null);
+        var verificationResult = identityService.verifyJwtToken(tokenResult.getContent().getToken());
 
         assertThat(verificationResult.succeeded()).isTrue();
     }

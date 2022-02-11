@@ -31,9 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Oauth2ValidationRuleTest {
 
-    private final Instant              now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-    private       Oauth2ValidationRule rule;
-    private       JWSHeader            jwsHeader;
+    private final Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+    private Oauth2ValidationRule rule;
+    private JWSHeader jwsHeader;
 
     @BeforeEach
     public void setUp() {

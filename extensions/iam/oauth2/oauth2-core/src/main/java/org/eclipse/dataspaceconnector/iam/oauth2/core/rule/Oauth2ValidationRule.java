@@ -41,6 +41,9 @@ public class Oauth2ValidationRule implements ValidationRule {
 
     /**
      * Validates the JWT by checking the audience, nbf, and expiration. Accessible for testing.
+     *
+     * @param toVerify The jwt including the claims.
+     * @param additional No more additional information needed for this validation, can be null.
      */
     @Override
     public Result<SignedJWT> checkRule(SignedJWT toVerify, @Nullable Map<String, Object> additional) {

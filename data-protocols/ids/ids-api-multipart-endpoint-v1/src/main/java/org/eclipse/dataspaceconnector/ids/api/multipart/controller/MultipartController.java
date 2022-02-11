@@ -103,7 +103,7 @@ public class MultipartController {
         }
 
         Map<String, Object> additional = new HashMap<>();
-        //TODO: make requirements for necessary fields transparent (additional infos needed for IdsValidationRule as not part of jwt claims)
+        //IDS token validation requires issuerConnector and securityProfile
         additional.put("issuerConnector", header.getIssuerConnector());
         try {
             additional.put("securityProfile", objectMapper.readValue(payload, Connector.class).getSecurityProfile());

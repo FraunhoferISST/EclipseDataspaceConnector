@@ -21,7 +21,7 @@ import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 
 /**
- * ServiceExtension providing IDS multipart related API controllers
+ * ServiceExtension providing extended IDS token validation
  */
 public final class IdsTokenValidationServiceExtension implements ServiceExtension {
 
@@ -40,6 +40,6 @@ public final class IdsTokenValidationServiceExtension implements ServiceExtensio
     @Override
     public void initialize(ServiceExtensionContext serviceExtensionContext) {
         var validateReffering = serviceExtensionContext.getSetting(EDC_IDS_VALIDATION_REFERRINGCONNECTOR, false);
-        oauth2Extension.setAdditionalValidationRule(new IdsValidationRule(validateReffering));
+        oauth2Extension.addAdditionalValidationRule(new IdsValidationRule(validateReffering));
     }
 }
