@@ -33,10 +33,10 @@ import okhttp3.ResponseBody;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.Oauth2Configuration;
 import org.eclipse.dataspaceconnector.iam.oauth2.core.rule.Oauth2ValidationRule;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.JwtDecoratorRegistry;
+import org.eclipse.dataspaceconnector.iam.oauth2.spi.Oauth2ServiceInterface;
 import org.eclipse.dataspaceconnector.iam.oauth2.spi.ValidationRule;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.iam.ClaimToken;
-import org.eclipse.dataspaceconnector.spi.iam.IdentityService;
 import org.eclipse.dataspaceconnector.spi.iam.TokenRepresentation;
 import org.eclipse.dataspaceconnector.spi.result.Result;
 import org.eclipse.dataspaceconnector.spi.types.TypeManager;
@@ -45,11 +45,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -58,7 +55,7 @@ import java.util.stream.Collectors;
 /**
  * Implements the OAuth2 client credentials flow and bearer token validation.
  */
-public class Oauth2ServiceImpl implements IdentityService {
+public class Oauth2ServiceImpl implements Oauth2ServiceInterface {
 
     private static final String GRANT_TYPE = "client_credentials";
     private static final String ASSERTION_TYPE = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
@@ -67,10 +64,11 @@ public class Oauth2ServiceImpl implements IdentityService {
     private final Oauth2Configuration configuration;
     private final OkHttpClient httpClient;
     private final TypeManager typeManager;
-    private final List<ValidationRule> validationRules;
     private final JWSSigner tokenSigner;
     private final JwtDecoratorRegistry jwtDecoratorRegistry;
     private final JWSAlgorithm jwsAlgorithm;
+
+    private List<ValidationRule> validationRules;
 
     /**
      * Creates a new instance of the OAuth2 Service
@@ -82,37 +80,25 @@ public class Oauth2ServiceImpl implements IdentityService {
      * @param typeManager               Type manager
      */
     public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager) {
-        this(configuration, tokenSigner, client, jwtDecoratorRegistry, typeManager, new LinkedList<>());
-    }
-
-    /**
-     * Creates a new instance of the OAuth2 Service
-     *
-     * @param configuration             The configuration
-     * @param tokenSigner               A {@link JWSSigner} instance.
-     * @param client                    Http client
-     * @param jwtDecoratorRegistry      Registry containing the decorator for build the JWT
-     * @param typeManager               Type manager
-     * @param additionalValidationRules A list of {@link ValidationRule} that are evaluated <em>after</em> the
-     *                                  standard OAuth2 validation
-     */
-    public Oauth2ServiceImpl(Oauth2Configuration configuration, JWSSigner tokenSigner, OkHttpClient client, JwtDecoratorRegistry jwtDecoratorRegistry, TypeManager typeManager, List<ValidationRule> additionalValidationRules) {
         this.configuration = configuration;
         this.typeManager = typeManager;
         httpClient = client;
         this.jwtDecoratorRegistry = jwtDecoratorRegistry;
         this.tokenSigner = tokenSigner;
 
-        List<ValidationRule> rules = new ArrayList<>();
-        rules.add(new Oauth2ValidationRule(this.configuration)); //OAuth2 validation must ALWAYS be done
-        rules.addAll(additionalValidationRules);
-        validationRules = Collections.unmodifiableList(rules);
+        //OAuth2 validation must ALWAYS be done
+        validationRules = List.of(new Oauth2ValidationRule(this.configuration));
 
         if (tokenSigner instanceof ECDSASigner) {
             jwsAlgorithm = JWSAlgorithm.ES256;
         } else {
             jwsAlgorithm = JWSAlgorithm.RS256;
         }
+    }
+
+    @Override
+    public void addAdditionalValidationRule(ValidationRule additionalValidationRule) {
+        validationRules.add(additionalValidationRule);
     }
 
     @Override

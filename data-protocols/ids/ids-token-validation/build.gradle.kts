@@ -26,7 +26,6 @@ dependencies {
     api(project(":data-protocols:ids:ids-spi"))
     api(project(":spi"))
     api(project(":extensions:iam:oauth2:oauth2-spi"))
-    api(project(":extensions:iam:oauth2:oauth2-core"))
 
     api("de.fraunhofer.iais.eis.ids.infomodel:java:${infoModelVersion}")
 
