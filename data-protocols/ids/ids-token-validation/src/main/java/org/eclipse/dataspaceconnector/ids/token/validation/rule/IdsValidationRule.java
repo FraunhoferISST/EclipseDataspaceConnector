@@ -60,7 +60,7 @@ public class IdsValidationRule implements ValidationRule {
             //referringConnector (DAT, optional) vs issuerConnector (Message-Header, mandatory)
             var referringConnector = claims.get("referringConnector");
 
-            if (Boolean.TRUE.equals(validateReferring) && referringConnector != null && !referringConnector.equals(issuerConnector)) {
+            if (validateReferring && !issuerConnector.equals(referringConnector)) {
                 return Result.failure("refferingConnector in token does not match issuerConnector in message");
             }
 
