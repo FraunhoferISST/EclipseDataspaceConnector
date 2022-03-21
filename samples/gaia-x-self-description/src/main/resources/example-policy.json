@@ -1,9 +1,0 @@
-{
-  "@context": "http://www.w3.org/ns/odrl.jsonld",
-  "@type": "Set",
-  "uid": "http://example.com/policy:1010",
-  "permission": [{
-  	"target": "http://example.com/target:1234",
-  	"action": "use"
-  }]
-}

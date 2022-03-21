@@ -14,25 +14,29 @@
 
 package org.eclipse.dataspaceconnector.extensions.gaiax;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.dataspaceconnector.spi.EdcException;
 import org.eclipse.dataspaceconnector.spi.WebService;
+import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.Requires;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.system.configuration.Config;
+import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractDefinition;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.net.URI;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
-
-import static java.lang.String.format;
 
 @Requires({WebService.class})
 public class GaiaxSelfDescriptionExtension implements ServiceExtension {
     private static final String GAIA_X_SELF_DESCRIPTION_CONFIG  = "edc.samples.gaiax.selfdescription";
+    
+    @Inject
+    private ContractDefinitionStore contractStore;
 
     @Override
     public void initialize(ServiceExtensionContext context) {
@@ -40,74 +44,24 @@ public class GaiaxSelfDescriptionExtension implements ServiceExtension {
         
         var config = context.getConfig(GAIA_X_SELF_DESCRIPTION_CONFIG);
         
-        var serviceProvider = URI.create(config.getString("serviceprovider"));
-        var resources = getResources(config, monitor);
-        var termsAndConditions = getTermsAndConditions(config, monitor);
-        var policies = getPolicies(config, monitor);
-        var selfDescription = GaiaxSelfDescription.Builder.newInstance()
-                .serviceProvider(serviceProvider)
-                .resources(resources)
-                .termsAndConditions(termsAndConditions)
-                .policies(policies)
-                .build();
+        readAndStoreContractDefinitions(monitor, config);
+        
+        var selfDescriptionService = new GaiaxSelfDescriptionService(monitor, config, contractStore);
 
         var webService = context.getService(WebService.class);
-        webService.registerResource(new GaiaxSelfDescriptionController(context.getMonitor(), selfDescription));
+        webService.registerResource(new GaiaxSelfDescriptionController(context.getMonitor(), selfDescriptionService));
     }
     
-    private List<URI> getResources(Config config, Monitor monitor) {
-        var resources = new ArrayList<URI>();
-        for (var entry : config.getConfig("resource").getEntries().entrySet()) {
-            try {
-                resources.add(URI.create(entry.getValue()));
-            } catch (IllegalArgumentException e) {
-                monitor.info(format("Invalid entry for resource: [(%s), (%s)]", entry.getKey(), entry.getValue()));
-            }
+    private void readAndStoreContractDefinitions(Monitor monitor, Config config) {
+        try (var inputStream = new FileInputStream(config.getString("contractdefinitions"))) {
+            var fileContent = new String(inputStream.readAllBytes());
+            var contractDefinitions = new ObjectMapper()
+                    .readValue(fileContent, new TypeReference<List<ContractDefinition>>(){});
+            contractDefinitions.forEach(contractStore::save);
+        } catch (EdcException e) {
+            monitor.info("No file with contract definitions supplied. Ignoring.");
+        } catch (IOException e) {
+            monitor.warning("Failed to read contract definitions from file: " + e.getMessage());
         }
-        return resources;
-    }
-    
-    private List<URI> getTermsAndConditions(Config config, Monitor monitor) {
-        var termsAndConditions = new ArrayList<URI>();
-        for (var entry : config.getConfig("termsandconditions").getEntries().entrySet()) {
-            try {
-                termsAndConditions.add(URI.create(entry.getValue()));
-            } catch (IllegalArgumentException e) {
-                monitor.info(format("Invalid entry for terms and conditions: [(%s), (%s)]", entry.getKey(), entry.getValue()));
-            }
-        }
-        return termsAndConditions;
-    }
-    
-    private List<GaiaxPolicy> getPolicies(Config config, Monitor monitor) {
-        var policies = new ArrayList<GaiaxPolicy>();
-        var policiesConfig = config.getConfig("policies");
-        
-        var nextExists = !policiesConfig.getEntries().isEmpty();
-        var counter = 0;
-        while (nextExists) {
-            var policyConfig = policiesConfig.getConfig(String.valueOf(counter));
-            if (!policyConfig.getEntries().isEmpty()) {
-                try {
-                    var type = policyConfig.getString("type");
-                    var filePath = policyConfig.getString("contentpath");
-                    var file = new File(filePath);
-                    var inputStream = new FileInputStream(file);
-                    var content = new String(inputStream.readAllBytes());
-                    policies.add(new GaiaxPolicy(type, content));
-                    inputStream.close();
-                    counter++;
-                } catch (EdcException e) {
-                    monitor.info(format("Failed to find required settings for policy [%s]. Error: %s", counter, e.getMessage()));
-                    counter++;
-                } catch (Exception e) {
-                    monitor.info(format("Failed to read policy [%s] from file. Error: %s", counter, e.getMessage()));
-                    counter++;
-                }
-            } else {
-                nextExists = false;
-            }
-        }
-        return policies;
     }
 }

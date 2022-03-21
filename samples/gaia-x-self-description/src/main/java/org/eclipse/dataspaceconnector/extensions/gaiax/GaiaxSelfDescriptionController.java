@@ -14,8 +14,6 @@
 
 package org.eclipse.dataspaceconnector.extensions.gaiax;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -23,31 +21,23 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 
-import static java.lang.String.format;
-
 @Consumes({MediaType.APPLICATION_JSON})
 @Produces({MediaType.APPLICATION_JSON})
 @Path("/")
 public class GaiaxSelfDescriptionController {
 
     private final Monitor monitor;
-    private final GaiaxSelfDescription gaiaxSelfDescription;
-    private final ObjectMapper objectMapper;
+    private final GaiaxSelfDescriptionService selfDescriptionService;
 
-    public GaiaxSelfDescriptionController(Monitor monitor, GaiaxSelfDescription gaiaxSelfDescription) {
+    public GaiaxSelfDescriptionController(Monitor monitor, GaiaxSelfDescriptionService selfDescriptionService) {
         this.monitor = monitor;
-        this.gaiaxSelfDescription = gaiaxSelfDescription;
-        this.objectMapper = new ObjectMapper();
+        this.selfDescriptionService = selfDescriptionService;
     }
     
     @GET
     @Path("gaiax")
-    public String selfDescription() {
+    public GaiaxSelfDescription selfDescription() {
         monitor.info("Received request for Gaia-X self description.");
-        try {
-            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(gaiaxSelfDescription);
-        } catch (JsonProcessingException e) {
-            return format("Error generating self description: %s", e.getMessage());
-        }
+        return selfDescriptionService.getSelfDescription();
     }
 }
