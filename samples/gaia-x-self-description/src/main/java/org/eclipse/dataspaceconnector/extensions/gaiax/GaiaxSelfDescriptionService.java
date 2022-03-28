@@ -39,12 +39,17 @@ public class GaiaxSelfDescriptionService {
         this.objectMapper = new ObjectMapper();
         
         var serviceProvider = URI.create(config.getString("serviceprovider"));
-        var resources = getResources(config);
-        var termsAndConditions = getTermsAndConditions(config);
+        var resources = getUris(config, "resource");
+        var termsAndConditions = getUris(config, "termsandconditions");
+        var physicalResources = getUris(config, "physicalresource");
+        var virtualResources = getUris(config, "virtualresource");
+        
         selfDescription = GaiaxSelfDescription.Builder.newInstance()
                 .serviceProvider(serviceProvider)
                 .resources(resources)
                 .termsAndConditions(termsAndConditions)
+                .physicalResources(physicalResources)
+                .virtualResources(virtualResources)
                 .build();
     }
     
@@ -86,6 +91,16 @@ public class GaiaxSelfDescriptionService {
             termsAndConditions.addAll(selfDescription.getTermsAndConditions());
         }
         
+        var physicalResources = new ArrayList<URI>();
+        if (selfDescription.getPhysicalResources() != null) {
+            physicalResources.addAll(selfDescription.getPhysicalResources());
+        }
+    
+        var virtualResources = new ArrayList<URI>();
+        if (selfDescription.getVirtualResources() != null) {
+            virtualResources.addAll(selfDescription.getVirtualResources());
+        }
+        
         var policies = new ArrayList<GaiaxPolicy>();
         if (selfDescription.getPolicies() != null) {
             selfDescription.getPolicies()
@@ -96,32 +111,22 @@ public class GaiaxSelfDescriptionService {
                 .serviceProvider(selfDescription.getServiceProvider())
                 .resources(resources)
                 .termsAndConditions(termsAndConditions)
+                .physicalResources(physicalResources)
+                .virtualResources(virtualResources)
                 .policies(policies)
                 .build();
     }
     
-    private List<URI> getResources(Config config) {
-        var resources = new ArrayList<URI>();
-        for (var entry : config.getConfig("resource").getEntries().entrySet()) {
+    private List<URI> getUris(Config config, String subConfigName) {
+        var list = new ArrayList<URI>();
+        for (var entry : config.getConfig(subConfigName).getEntries().entrySet()) {
             try {
-                resources.add(URI.create(entry.getValue()));
+                list.add(URI.create(entry.getValue()));
             } catch (IllegalArgumentException e) {
-                monitor.info(format("Invalid entry for resource: [(%s), (%s)]", entry.getKey(), entry.getValue()));
+                monitor.info(format("Invalid entry: [(%s), (%s)]", entry.getKey(), entry.getValue()));
             }
         }
-        return resources;
-    }
-    
-    private List<URI> getTermsAndConditions(Config config) {
-        var termsAndConditions = new ArrayList<URI>();
-        for (var entry : config.getConfig("termsandconditions").getEntries().entrySet()) {
-            try {
-                termsAndConditions.add(URI.create(entry.getValue()));
-            } catch (IllegalArgumentException e) {
-                monitor.info(format("Invalid entry for terms and conditions: [(%s), (%s)]", entry.getKey(), entry.getValue()));
-            }
-        }
-        return termsAndConditions;
+        return list;
     }
     
 }

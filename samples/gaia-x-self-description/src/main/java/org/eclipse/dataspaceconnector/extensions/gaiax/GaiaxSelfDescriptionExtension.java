@@ -42,11 +42,11 @@ public class GaiaxSelfDescriptionExtension implements ServiceExtension {
     public void initialize(ServiceExtensionContext context) {
         var monitor = context.getMonitor();
         
-        var config = context.getConfig(GAIA_X_SELF_DESCRIPTION_CONFIG);
+        var gaiaxConfig = context.getConfig(GAIA_X_SELF_DESCRIPTION_CONFIG);
         
-        readAndStoreContractDefinitions(monitor, config);
+        readAndStoreContractDefinitions(monitor, gaiaxConfig);
         
-        var selfDescriptionService = new GaiaxSelfDescriptionService(monitor, config, contractStore);
+        var selfDescriptionService = new GaiaxSelfDescriptionService(monitor, gaiaxConfig, contractStore);
 
         var webService = context.getService(WebService.class);
         webService.registerResource(new GaiaxSelfDescriptionController(context.getMonitor(), selfDescriptionService));

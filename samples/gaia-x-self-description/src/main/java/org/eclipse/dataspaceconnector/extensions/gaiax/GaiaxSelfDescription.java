@@ -15,10 +15,12 @@
 package org.eclipse.dataspaceconnector.extensions.gaiax;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.net.URI;
 import java.util.List;
 
+@JsonPropertyOrder({"providedBy", "aggregationOf", "termsAndConditions", "physicalResource", "virtualResource", "policies"})
 public class GaiaxSelfDescription {
     
     @JsonProperty("providedBy")
@@ -29,6 +31,12 @@ public class GaiaxSelfDescription {
     
     @JsonProperty("termsAndConditions")
     private List<URI> termsAndConditions;
+    
+    @JsonProperty("physicalResource")
+    private List<URI> physicalResources;
+    
+    @JsonProperty("virtualResource")
+    private List<URI> virtualResources;
     
     private List<GaiaxPolicy> policies;
     
@@ -45,6 +53,14 @@ public class GaiaxSelfDescription {
     
     public List<URI> getTermsAndConditions() {
         return termsAndConditions;
+    }
+    
+    public List<URI> getPhysicalResources() {
+        return physicalResources;
+    }
+    
+    public List<URI> getVirtualResources() {
+        return virtualResources;
     }
     
     public List<GaiaxPolicy> getPolicies() {
@@ -74,6 +90,16 @@ public class GaiaxSelfDescription {
         
         public Builder termsAndConditions(List<URI> termsAndConditions) {
             selfDescription.termsAndConditions = termsAndConditions;
+            return this;
+        }
+        
+        public Builder physicalResources(List<URI> physicalResources) {
+            this.selfDescription.physicalResources = physicalResources;
+            return this;
+        }
+    
+        public Builder virtualResources(List<URI> virtualResources) {
+            this.selfDescription.virtualResources = virtualResources;
             return this;
         }
         
