@@ -21,13 +21,13 @@ import java.util.List;
 
 public class GaiaxSelfDescription {
     
-    @JsonProperty("service_provider")
+    @JsonProperty("providedBy")
     private URI serviceProvider;
     
-    @JsonProperty("resource")
+    @JsonProperty("aggregationOf")
     private List<URI> resources;
     
-    @JsonProperty("terms_and_conditions")
+    @JsonProperty("termsAndConditions")
     private List<URI> termsAndConditions;
     
     private List<GaiaxPolicy> policies;
