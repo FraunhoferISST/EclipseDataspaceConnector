@@ -61,7 +61,7 @@ public class GaiaxSelfDescriptionService {
             var accessPolicy = contractDefinition.getAccessPolicy();
             try {
                 var accessPolicyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(accessPolicy);
-                copy.getPolicies().add(new GaiaxPolicy("ordl", accessPolicyJson));
+                copy.getPolicies().add(new GaiaxPolicy("odrl", accessPolicyJson));
             } catch (JsonProcessingException e) {
                 monitor.warning(format("Failed to parse policy with ID [%s]: %s",
                         accessPolicy.getUid(), e.getMessage()));
@@ -70,7 +70,7 @@ public class GaiaxSelfDescriptionService {
             var contractPolicy = contractDefinition.getContractPolicy();
             try {
                 var contractPolicyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(contractPolicy);
-                copy.getPolicies().add(new GaiaxPolicy("ordl", contractPolicyJson));
+                copy.getPolicies().add(new GaiaxPolicy("odrl", contractPolicyJson));
             } catch (JsonProcessingException e) {
                 monitor.warning(format("Failed to parse policy with ID [%s]: %s",
                         contractPolicy.getUid(), e.getMessage()));
