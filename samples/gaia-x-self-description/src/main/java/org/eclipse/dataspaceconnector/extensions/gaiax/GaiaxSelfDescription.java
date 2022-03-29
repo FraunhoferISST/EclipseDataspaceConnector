@@ -24,10 +24,10 @@ import java.util.List;
 public class GaiaxSelfDescription {
     
     @JsonProperty("providedBy")
-    private URI serviceProvider;
+    private URI providedBy;
     
     @JsonProperty("aggregationOf")
-    private List<URI> resources;
+    private List<URI> aggregationOf;
     
     @JsonProperty("termsAndConditions")
     private List<URI> termsAndConditions;
@@ -43,12 +43,12 @@ public class GaiaxSelfDescription {
     private GaiaxSelfDescription() {
     }
     
-    public URI getServiceProvider() {
-        return serviceProvider;
+    public URI getProvidedBy() {
+        return providedBy;
     }
     
-    public List<URI> getResources() {
-        return resources;
+    public List<URI> getAggregationOf() {
+        return aggregationOf;
     }
     
     public List<URI> getTermsAndConditions() {
@@ -78,13 +78,13 @@ public class GaiaxSelfDescription {
             return new Builder();
         }
         
-        public Builder serviceProvider(URI serviceProvider) {
-            selfDescription.serviceProvider = serviceProvider;
+        public Builder providedBy(URI providedBy) {
+            selfDescription.providedBy = providedBy;
             return this;
         }
         
-        public Builder resources(List<URI> resources) {
-            selfDescription.resources = resources;
+        public Builder aggregationOf(List<URI> aggregationOf) {
+            selfDescription.aggregationOf = aggregationOf;
             return this;
         }
         

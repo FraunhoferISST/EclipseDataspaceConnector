@@ -38,15 +38,15 @@ public class GaiaxSelfDescriptionService {
         this.monitor = monitor;
         this.objectMapper = new ObjectMapper();
         
-        var serviceProvider = URI.create(config.getString("serviceprovider"));
-        var resources = getUris(config, "resource");
+        var providedBy = URI.create(config.getString("providedby"));
+        var aggregationOf = getUris(config, "aggregationof");
         var termsAndConditions = getUris(config, "termsandconditions");
         var physicalResources = getUris(config, "physicalresource");
         var virtualResources = getUris(config, "virtualresource");
         
         selfDescription = GaiaxSelfDescription.Builder.newInstance()
-                .serviceProvider(serviceProvider)
-                .resources(resources)
+                .providedBy(providedBy)
+                .aggregationOf(aggregationOf)
                 .termsAndConditions(termsAndConditions)
                 .physicalResources(physicalResources)
                 .virtualResources(virtualResources)
@@ -82,8 +82,8 @@ public class GaiaxSelfDescriptionService {
     
     private GaiaxSelfDescription copySelfDescription(GaiaxSelfDescription selfDescription) {
         var resources = new ArrayList<URI>();
-        if (selfDescription.getResources() != null) {
-            resources.addAll(selfDescription.getResources());
+        if (selfDescription.getAggregationOf() != null) {
+            resources.addAll(selfDescription.getAggregationOf());
         }
     
         var termsAndConditions = new ArrayList<URI>();
@@ -108,8 +108,8 @@ public class GaiaxSelfDescriptionService {
         }
         
         return GaiaxSelfDescription.Builder.newInstance()
-                .serviceProvider(selfDescription.getServiceProvider())
-                .resources(resources)
+                .providedBy(selfDescription.getProvidedBy())
+                .aggregationOf(resources)
                 .termsAndConditions(termsAndConditions)
                 .physicalResources(physicalResources)
                 .virtualResources(virtualResources)
