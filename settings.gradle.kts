@@ -158,6 +158,9 @@ include(":samples:other:dataseed:dataseed-policy")
 include(":samples:other:run-from-junit")
 include(":samples:other:custom-runtime")
 
+include(":samples:showCase")
+
+
 
 // extension points for a connector
 include(":spi")
