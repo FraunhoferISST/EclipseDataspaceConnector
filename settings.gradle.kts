@@ -216,3 +216,6 @@ include(":system-tests:runtimes:azure-data-factory-transfer-consumer")
 include(":system-tests:runtimes:azure-storage-transfer-consumer")
 include(":system-tests:azure-tests")
 include(":system-tests:azure-data-factory-tests")
+
+include(":samples:uc-workshop:policy-functions")
+include(":samples:uc-workshop:connector")
