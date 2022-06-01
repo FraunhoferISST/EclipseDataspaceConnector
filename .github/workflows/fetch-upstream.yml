@@ -1,4 +1,4 @@
-name: Fetch Upstream
+name: 'Upstream Sync'
 
 on:
   schedule:
@@ -6,13 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  fetch-upstream:
+  sync_latest_from_upstream:
     runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
+
     steps:
-      - uses: actions/checkout@master
-      - name: Fetch Upstream
-        uses: bdougie/fetch-upstream@master
+      - name: Checkout target repo
+        uses: actions/checkout@v2
         with:
-          upstream: eclipse-dataspaceconnector/DataSpaceConnector
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.2
+        with:
+          target_sync_branch: my-branch
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_sync_branch: main
+          upstream_sync_repo: eclipse-dataspaceconnector/DataSpaceConnector
+
+      - name: New commits found
+        if: steps.sync.outputs.has_new_commits == 'true'
+        run: echo "New commits were found to sync."
+
+      - name: No new commits
+        if: steps.sync.outputs.has_new_commits == 'false'
+        run: echo "There were no new commits."
+
+      - name: Show value of 'has_new_commits'
+        run: echo ${{ steps.sync.outputs.has_new_commits }}
