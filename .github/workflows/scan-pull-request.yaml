@@ -35,10 +35,24 @@ jobs:
           # Valid examples would be
           # - fix: resolve minor issue
           # - assetindex: update some dependency
-          # - docs(sample5): update docs for configuration
+          # - docs(sample5): add code snippet
           # - feat(management-api)!: change path to access contract agreements
           #
           # Invalid examples would be
           # - Add cool feature
           # - Feature/some cool improvement
           regex: '(?<type>\w+)(?<scope>(?:\([^()\r\n]*\)|\()?(?<breaking>!)?):(?<subject>.*)?'
+
+  check-commit-message:
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    steps:
+      - name: Check Format of Commit Message
+        uses: gsactions/commit-message-checker@v1
+        with:
+          pattern: '(?<type>\w+)(?<scope>(?:\([^()\r\n]*\)|\()?(?<breaking>!)?):(?<subject>.*)?'
+          error: 'Please take a look at our contribution guidelines: https://github.com/eclipse-dataspaceconnector/DataSpaceConnector/blob/main/CONTRIBUTING.md#submit-a-pull-request'
+          excludeDescription: 'true' # excludes the description body of a pull request
+          excludeTitle: 'true' # excludes the title of a pull request
+          checkAllCommitMessages: 'true' # checks all commits associated with a pull request
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # only required if checkAllCommitMessages is true
