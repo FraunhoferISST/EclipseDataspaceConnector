@@ -42,3 +42,12 @@ jobs:
           # - Feature/some cool improvement
           # - fix: resolve minor issue.
           regex: '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\(\w+((,|\/|\\)?\s?\w+)+\))?!?: [\S ]{1,49}[^\.]$'
+
+  check_labels:
+    name: Check labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: agilepathway/pull-request-label-checker@v1
+        with:
+          any_of: *
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
