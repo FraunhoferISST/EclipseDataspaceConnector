@@ -2,10 +2,10 @@
   "edctype": "dataspaceconnector:datarequest",
   "protocol": "ids-multipart",
   "assetId": "test-document",
-  "contractId": "{agreement ID}",
+  "contractId": "1:3f9cf721-6667-4afa-95ac-1d3993ed43f4",
   "dataDestination": {
     "properties": {
-      "path": "{path to destination file}",
+      "path": "C:\\Users\\jmeyer\\Desktop\\testDoc4.txt",
       "keyName": "keyName",
       "type": "File"
     }
