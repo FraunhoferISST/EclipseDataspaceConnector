@@ -24,42 +24,50 @@ public class AuditLoggingSubscriber implements EventSubscriber {
     @Override
     public void on(Event<?> event) {
         if (event instanceof TransferProcessInitiated) {
-            var process = transferProcessStore.find(((TransferProcessInitiated) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessCancelled) {
-            var process = transferProcessStore.find(((TransferProcessCancelled) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessCompleted) {
-            var process = transferProcessStore.find(((TransferProcessCompleted) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessDeprovisioned) {
-            var process = transferProcessStore.find(((TransferProcessDeprovisioned) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessEnded) {
-            var process = transferProcessStore.find(((TransferProcessEnded) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessFailed) {
-            var process = transferProcessStore.find(((TransferProcessFailed) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
         if (event instanceof TransferProcessProvisioned) {
-            var process = transferProcessStore.find(((TransferProcessProvisioned) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
 
         if (event instanceof TransferProcessRequested) {
-            var process = transferProcessStore.find(((TransferProcessRequested) event).getPayload().getTransferProcessId());
-            monitor.info(process.toString());
+            creatingLog(event);
         }
 
 
-        Log log = new Log("TEST ID", "TEST Source", String.valueOf(event.getAt()), "Test Message");
+       // Log log = new Log("TEST ID", "TEST Source", String.valueOf(event.getAt()), "Test Message");
+       // auditLoggingManagerService.addLog(log);
+       // auditLoggingManagerService.getAllLogs().forEach(x -> monitor.info(x.toString()));
+    }
+
+    private void creatingLog(Event event){
+        var process = transferProcessStore.find(((event.getPayload().getClass()) event).getPayload().getTransferProcessId());
+        var dataAdress = process.getContentDataAddress();
+        var dataRequest = process.getDataRequest();
+        var transferprocessType = process.getType();
+        var ressourceManifest = process.getResourceManifest();
+        monitor.info(process.toString());
+        monitor.info(dataAdress.toString());
+        monitor.info(dataRequest.toString());
+        monitor.info(transferprocessType.toString());
+        monitor.info(ressourceManifest.toString());
+
+        var log = new Log(event.getAt(),String.format("Transferprocess %s liegt im Status %s vor.",event.getPayload()))
         auditLoggingManagerService.addLog(log);
-        auditLoggingManagerService.getAllLogs().forEach(x -> monitor.info(x.toString()));
     }
 }
