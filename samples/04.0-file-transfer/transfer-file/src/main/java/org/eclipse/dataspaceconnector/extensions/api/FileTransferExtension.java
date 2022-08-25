@@ -23,6 +23,7 @@ import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
 import org.eclipse.dataspaceconnector.spi.asset.AssetIndex;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
+import org.eclipse.dataspaceconnector.spi.event.EventRouter;
 import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
@@ -48,6 +49,10 @@ public class FileTransferExtension implements ServiceExtension {
     @Inject
     private PolicyDefinitionStore policyStore;
 
+    @Inject
+    private EventRouter router;
+
+
     @Override
     public void initialize(ServiceExtensionContext context) {
         var monitor = context.getMonitor();
@@ -63,6 +68,7 @@ public class FileTransferExtension implements ServiceExtension {
 
         registerDataEntries(context);
         registerContractDefinition(policy.getUid());
+
 
         context.getMonitor().info("File Transfer Extension initialized!");
     }

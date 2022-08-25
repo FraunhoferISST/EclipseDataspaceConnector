@@ -23,24 +23,25 @@ plugins {
 }
 
 dependencies {
-    api(project(":spi:core-spi"))
+    api(project(":spi:common:core-spi"))
+    api(project(":spi:control-plane:transfer-spi"))
     implementation(project(":core"))
 
     api(project(":extensions:audit-logging:audit-logging-spi"))
 
     implementation("io.codenotary:immudb4j:0.9.10.2")
 
-    testImplementation(project(":extensions:http"))
-    testImplementation(project(":core:defaults"))
-    testImplementation(project(":extensions:transaction:transaction-local"))
+    testImplementation(project(":extensions:common:http"))
+    //testImplementation(project(":core:defaults"))
+    //testImplementation(project(":extensions:transaction:transaction-local"))
 
-    testImplementation("org.testng:testng:6.8.8")
+    //estImplementation("org.testng:testng:6.8.8")
 
     implementation("javax.annotation:javax.annotation-api:1.2-b01")
 
-    testImplementation(testFixtures(project(":common:util")))
-    testImplementation("io.rest-assured:rest-assured:${restAssured}")
-    testRuntimeOnly("org.glassfish.jersey.ext:jersey-bean-validation:${jerseyVersion}") //for validation
+    //testImplementation(testFixtures(project(":common:util")))
+    //testImplementation("io.rest-assured:rest-assured:${restAssured}")
+    //testRuntimeOnly("org.glassfish.jersey.ext:jersey-bean-validation:${jerseyVersion}") //for validation
 }
 
 

@@ -18,8 +18,8 @@ plugins {
 }
 
 dependencies {
-    api(project(":spi:core-spi"))
-    implementation(project(":extensions:api:api-core"))
+    api(project(":spi:common:core-spi"))
+    implementation(project(":extensions:common:api:api-core"))
 }
 
 publishing {

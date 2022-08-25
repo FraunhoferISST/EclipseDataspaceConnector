@@ -34,6 +34,9 @@ dependencies {
     implementation(project(":extensions:common:auth:auth-tokenbased"))
     implementation(project(":extensions:control-plane:api:data-management"))
 
+    implementation(project(":extensions:audit-logging:audit-logging-manager"))
+    implementation(project(":extensions:audit-logging:audit-logging-api"))
+
     implementation(project(":data-protocols:ids"))
 
     implementation(project(":samples:04.0-file-transfer:transfer-file"))

@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":extensions:api:api-core"))
+    implementation(project(":extensions:common:api:api-core"))
 
     implementation(project(":extensions:audit-logging:audit-logging-manager"))
     implementation(project(":extensions:audit-logging:audit-logging-api-configuration"))

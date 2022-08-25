@@ -9,15 +9,14 @@
  *
  *  Contributors:
  *       Microsoft Corporation - initial API and implementation
- *       Fraunhofer Institute for Software and Systems Engineering - refactoring
+ *       Fraunhofer Institute for Software and Systems Engineering
  *       ZF Friedrichshafen AG - add dependency & reorder entries
- *       Fraunhofer Institute for Software and Systems Engineering - refactoring
  *
  */
 
 rootProject.name = "dataspaceconnector"
 
-// EDC core modules --------------------------------------------------------------------------------
+// EDC core modules
 include(":core:common:base")
 include(":core:common:boot")
 include(":core:common:jwt-core")
@@ -25,8 +24,6 @@ include(":core:common:policy-engine")
 include(":core:common:policy-evaluator")
 include(":core:common:state-machine")
 include(":core:common:util")
-
-include(":core:control-plane:contract")
 include(":core:control-plane:control-plane-core")
 include(":core:control-plane:transfer")
 
@@ -46,6 +43,13 @@ include(":data-protocols:ids:ids-jsonld-serdes")
 include(":data-protocols:ids:ids-spi")
 include(":data-protocols:ids:ids-token-validation")
 include(":data-protocols:ids:ids-transform-v1")
+
+
+// modules for audit-logging
+include(":extensions:audit-logging:audit-logging-api")
+include(":extensions:audit-logging:audit-logging-api-configuration")
+include(":extensions:audit-logging:audit-logging-manager")
+include(":extensions:audit-logging:audit-logging-spi")
 
 // modules for technology- or cloud-provider extensions --------------------------------------------
 include(":extensions:common:api:api-core")
@@ -154,14 +158,6 @@ include(":samples:04.2-modify-transferprocess:modify-transferprocess-sample-inte
 include(":samples:04.2-modify-transferprocess:simulator")
 include(":samples:04.2-modify-transferprocess:watchdog")
 
-include(":samples:04.3-open-telemetry:consumer")
-include(":samples:04.3-open-telemetry:provider")
-
-include(":samples:05-file-transfer-cloud:consumer")
-include(":samples:05-file-transfer-cloud:provider")
-include(":samples:05-file-transfer-cloud:transfer-file")
-
-// modules for code samples ------------------------------------------------------------------------
 include(":samples:other:custom-runtime")
 
 // extension points for a connector ----------------------------------------------------------------
