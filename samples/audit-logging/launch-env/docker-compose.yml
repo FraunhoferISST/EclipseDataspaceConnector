@@ -1,0 +1,57 @@
+version: "3.9"  # optional since v1.27.0
+
+networks:
+  edc_network:
+    driver: bridge
+
+services:
+  edc:
+    build: ../.
+    container_name: edc
+    environment:
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: bootx
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: changeme
+      IDS_WEBHOOK_ADRESS: localhost
+      EDC_API_KEY: password
+    ports:
+      - 8181:8181
+      - 8182:8182
+      - 8183:8183
+      - 8282:8282
+    networks:
+      - edc_network
+    depends_on:
+      - postgresql
+
+  postgresql:
+    image: postgres
+    container_name: postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: bootx
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - db:/var/lib/postgresql/data
+    networks:
+      - edc_network
+    ports:
+      - 5432:5432
+
+  immudb:
+    image: codenotary/immudb:latest
+    container_name: immudb
+    ports:
+      - 3322:3322
+      - 8080:8080
+    networks:
+      - edc_network
+
+
+volumes:
+  db:
+    driver: local

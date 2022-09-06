@@ -160,6 +160,8 @@ include(":samples:04.2-modify-transferprocess:watchdog")
 
 include(":samples:other:custom-runtime")
 
+include(":samples:audit-logging")
+
 // extension points for a connector ----------------------------------------------------------------
 include(":spi:common:auth-spi")
 include(":spi:common:catalog-spi")

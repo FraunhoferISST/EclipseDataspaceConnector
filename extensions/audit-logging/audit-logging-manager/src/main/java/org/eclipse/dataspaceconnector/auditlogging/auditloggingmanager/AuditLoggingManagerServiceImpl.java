@@ -25,14 +25,18 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
                 .withServerPort(databaseConfig.getInteger("port"))
                 .build();
         this.monitor = monitor;
-    }
 
-    @Override
-    public void addLog(Log log) {
         immuClient.login(databaseConfig.getString("user"), databaseConfig.getString("userpassword"));
         if (!immuClient.databases().contains(databaseConfig.getString("db"))) {
             immuClient.createDatabase(databaseConfig.getString("db"));
         }
+
+        monitor.info("SERVER VERBINDUNG WURDE AUFGEBAUT");
+    }
+
+    @Override
+    public void addLog(Log log) {
+
 
         immuClient.useDatabase(databaseConfig.getString("db"));
 

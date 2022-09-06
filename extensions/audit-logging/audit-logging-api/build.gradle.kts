@@ -11,7 +11,7 @@ dependencies {
 
     implementation(project(":extensions:audit-logging:audit-logging-manager"))
     implementation(project(":extensions:audit-logging:audit-logging-api-configuration"))
-   // implementation(project(":extensions:audit-logging:audit-logging-api"))
+    implementation(project(":extensions:audit-logging:audit-logging-spi"))
 
   //  implementation(project(":extensions:api:auth-spi"))
   //  implementation(project(":extensions:api:data-management:api-configuration"))
