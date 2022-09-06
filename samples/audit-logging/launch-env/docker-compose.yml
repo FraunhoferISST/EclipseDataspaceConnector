@@ -52,6 +52,16 @@ services:
       - edc_network
 
 
+  file_server_backend:
+    build: ../thirdPartyPrototype/.
+    container_name: file_server
+    ports:
+      - 5000:5000
+
+    networks:
+      - edc_network
+
+
 volumes:
   db:
     driver: local
