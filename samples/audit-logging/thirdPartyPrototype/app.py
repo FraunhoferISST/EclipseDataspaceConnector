@@ -1,8 +1,8 @@
 from flask import Flask
 from markupsafe import escape
 from flask import request
-from flask import Response
 import requests
+
 
 app = Flask(__name__)
 
@@ -30,7 +30,9 @@ def post_file(filename):
 
     path = "files/" + escape(filename) + ".txt"
 
-    print(data)
+    with open(path, "w") as f:
+        f.write(data.decode('utf-8'))
+        f.close()
 
     return "Got Input"
 
