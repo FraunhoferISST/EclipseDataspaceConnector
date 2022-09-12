@@ -4,7 +4,6 @@ import org.eclipse.dataspaceconnector.auditlogging.AuditLoggingManagerService;
 import org.eclipse.dataspaceconnector.auditlogging.Log;
 import org.eclipse.dataspaceconnector.spi.event.Event;
 import org.eclipse.dataspaceconnector.spi.event.EventSubscriber;
-import org.eclipse.dataspaceconnector.spi.event.asset.AssetEventPayload;
 import org.eclipse.dataspaceconnector.spi.event.transferprocess.*;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.transfer.store.TransferProcessStore;
@@ -26,18 +25,23 @@ public class AuditLoggingSubscriber implements EventSubscriber {
 
     @Override
     public void on(Event<?> event) {
-        if (event.getPayload() instanceof AssetEventPayload) {
+        if (event.getPayload() instanceof TransferProcessEventPayload) {
             creatingLog(event);
         }
-
-
-
-        Log log = new Log("TEST ID", "TEST Source", String.valueOf(event.getAt()), "Test Message");
-        auditLoggingManagerService.addLog(log);
-        auditLoggingManagerService.getAllLogs().forEach(x -> monitor.info(x.toString()));
     }
 
     private void creatingLog(Event event){
-
+        var eventPayload = (TransferProcessEventPayload) event.getPayload();
+        var transfer = transferProcessStore.find(eventPayload.getTransferProcessId());
+        var request = transfer.getDataRequest();
+        var message = String.format("Das Asset %s wird vom Dataprovider %s:%s zu dem DatenConsumer %s mit Hilfe der Dataplane versendet. Aktueller Dataplanestatus: %s",
+                transfer.getDataRequest().getAssetId(),
+                request.getConnectorId(),
+                request.getConnectorAddress(),
+                request.getDataDestination().getProperties().get("baseUrl"),
+                event.getClass().getSimpleName()
+        );
+        Log log = new Log(transfer.getDataRequest().getAssetId(), "EDC ID", String.valueOf(event.getAt()), message);
+        auditLoggingManagerService.addLog(log);
     }
 }

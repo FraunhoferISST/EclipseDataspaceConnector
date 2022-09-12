@@ -23,6 +23,8 @@ ENV POSTGRES_USER="root"
 ENV POSTGRES_PASSWORD="changeme"
 ENV IDS_WEBHOOK_ADRESS="localhost"
 ENV EDC_API_KEY="password"
+ENV EDC_IDS_ID="urn:connector:provider"
+ENV EDC_ID="FraunhoferISST"
 
 
 ENTRYPOINT java \
@@ -44,4 +46,6 @@ ENTRYPOINT java \
     -Dedc.datasource.transferprocess.url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DATABASE \
     -Dedc.datasource.transferprocess.user=$POSTGRES_USER \
     -Dedc.datasource.transferprocess.password=$POSTGRES_PASSWORD \
+    -Dedc.ids.id=$EDC_IDS_ID \
+    -Dedc.hostname=$EDC_ID \
     -Djava.security.edg=file:/dev/.urandom -jar audit-logging.jar

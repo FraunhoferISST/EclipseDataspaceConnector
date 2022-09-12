@@ -3,23 +3,25 @@ package org.eclipse.dataspaceconnector.auditlogging;
 import java.io.Serializable;
 
 public class Log implements Serializable {
-    private String dataId;
-    private String logMessage;
-    private String sourceId;
-    private String timestamp;
+    protected String dataId;
+    protected String sourceId;
+    protected String timestamp;
+
+    protected String message;
 
     public Log(String id, String sourceId, String timestamp, String message) {
         this.dataId = id;
-        this.logMessage = message;
         this.sourceId = sourceId;
         this.timestamp = timestamp;
+        this.message = message;
     }
 
     public String getUid() {
-        return String.format("%s:%s", dataId, timestamp);
+        return String.format("%s:%s:%s", dataId,sourceId, timestamp);
     }
 
+    @Override
     public String toString() {
-        return String.format("{%s,%s,%s,%s}", dataId, sourceId, timestamp, logMessage);
+        return String.format("{%s,%s,%s,%s}",this.dataId,this.sourceId,this.timestamp,this.message);
     }
 }

@@ -7,6 +7,7 @@ import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.dataspaceconnector.auditlogging.AuditLoggingManagerService;
+import org.eclipse.dataspaceconnector.auditlogging.CustomLog;
 import org.eclipse.dataspaceconnector.auditlogging.Log;
 import org.eclipse.dataspaceconnector.auditlogging.auditloggingapi.model.LoggingBody;
 
@@ -33,7 +34,7 @@ public class AuditLoggingApiController implements AuditLoggingApi {
     @POST
     @Path("/newLogs")
     public String createNewLog(@Valid LoggingBody body) {
-        loggingService.addLog(new Log(body.getDataID(), body.getSourceID(), body.getTimestamp(), body.getLogText()));
+        loggingService.addLog(new CustomLog(body.getDataID(), body.getSourceID(), body.getTimestamp(), body.getLogText()));
         return "Log was added";
     }
 }

@@ -18,8 +18,9 @@ plugins {
     `java-library`
 }
 dependencies {
-    //api(project(":spi:core-spi"))
-    //implementation(project(":common:util"))
+    api(project(":spi:common:core-spi"))
+    api(project(":spi:control-plane:transfer-spi"))
+    implementation(project(":core"))
 }
 
 

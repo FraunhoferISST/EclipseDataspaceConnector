@@ -36,13 +36,12 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
 
     @Override
     public void addLog(Log log) {
-
-
         immuClient.useDatabase(databaseConfig.getString("db"));
 
         try {
             immuClient.set(log.getUid(), logToByte(log));
         } catch (CorruptedDataException e) {
+            monitor.info(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -58,6 +57,7 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
             });
             return returnListLogs;
         } catch (KeyNotFoundException e) {
+            monitor.info(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -70,6 +70,7 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
             oos.flush();
             return bos.toByteArray();
         } catch (IOException e) {
+            monitor.info(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -81,8 +82,10 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
 
             return (Log) in.readObject();
         } catch (IOException e) {
+            monitor.info(e.getMessage());
             throw new RuntimeException(e);
         } catch (ClassNotFoundException e) {
+            monitor.info(e.getMessage());
             throw new RuntimeException(e);
         }
     }
