@@ -4,8 +4,16 @@ import org.eclipse.dataspaceconnector.auditlogging.AuditLoggingManagerService;
 import org.eclipse.dataspaceconnector.auditlogging.Log;
 import org.eclipse.dataspaceconnector.spi.event.Event;
 import org.eclipse.dataspaceconnector.spi.event.EventSubscriber;
+import org.eclipse.dataspaceconnector.spi.event.asset.AssetCreated;
+import org.eclipse.dataspaceconnector.spi.event.asset.AssetDeleted;
+import org.eclipse.dataspaceconnector.spi.event.contractdefinition.ContractDefinitionCreated;
+import org.eclipse.dataspaceconnector.spi.event.contractdefinition.ContractDefinitionDeleted;
+import org.eclipse.dataspaceconnector.spi.event.contractnegotiation.ContractNegotiationApproved;
+import org.eclipse.dataspaceconnector.spi.event.policydefinition.PolicyDefinitionCreated;
+import org.eclipse.dataspaceconnector.spi.event.policydefinition.PolicyDefinitionDeleted;
 import org.eclipse.dataspaceconnector.spi.event.transferprocess.*;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.policy.PolicyDefinition;
 import org.eclipse.dataspaceconnector.spi.transfer.store.TransferProcessStore;
 
 
@@ -25,9 +33,60 @@ public class AuditLoggingSubscriber implements EventSubscriber {
 
     @Override
     public void on(Event<?> event) {
+        String message = null;
+
+        // [AssetEvent] #EDCID created asset ASSETID
+        if (event.getPayload() instanceof AssetCreated.Payload){
+            message =  String.format("[AssetEvent] #EDCID created asset ASSETID");
+        }
+
+        // [AssetEvent] #EDCID deleted asset ASSETID
+        if (event.getPayload() instanceof AssetDeleted.Payload){
+            message =  String.format("[AssetEvent] #EDCID deleted asset ASSETID");
+        }
+
+        // [PolicyEvent] #EDCID created policy #POLICYID
+        if (event.getPayload() instanceof PolicyDefinitionCreated.Payload){
+            message =  String.format("[AssetEvent] #[PolicyEvent] #EDCID created policy #POLICYID");
+        }
+        // [PolicyEvent] #EDCID deleted policy #POLICYID
+        if (event.getPayload() instanceof PolicyDefinitionDeleted.Payload){
+            message =  String.format("[PolicyEvent] #EDCID deleted policy #POLICYID");
+        }
+
+        // [ContractDefinitionEvent] #EDCID created contractdefinition #CONTRACTDEFINITIONID. With this asset #ASSETID is published with accesspolicy #POLICYID and usepolicy #POLICYID.
+        if (event.getPayload() instanceof ContractDefinitionCreated.Payload){
+            message =  String.format("[ContractDefinitionEvent] #EDCID created contractdefinition #CONTRACTDEFINITIONID. " +
+                    "With this asset #ASSETID is published with accesspolicy #POLICYID and usepolicy #POLICYID.");
+        }
+
+        // [ContractDefinitionEvent] #EDCID deleted contractdefinition #CONTRACTDEFINITIONID.
+        if (event.getPayload() instanceof ContractDefinitionDeleted.Payload){
+            message =  String.format("[ContractDefinitionEvent] #EDCID deleted contractdefinition #CONTRACTDEFINITIONID.");
+        }
+
+        // [ContractNegotiationEvent] #EDCIDConsumer is negotiating with #EDCIDProvider about the asset #assetId with policy #PolicyID. Status: [Approved|Confirmed|Declined|Failed|Initiated|Offered|Requested]
+        //TODO: Update branch and use ContractNegotiationEventPayload
+        if (event.getPayload() instanceof ContractNegotiationApproved.Payload){
+            message =  String.format("[ContractNegotiationEvent] #EDCIDConsumer is negotiating with #EDCIDProvider about the asset #assetId with policy #PolicyID. Status: [Approved|Confirmed|Declined|Failed|Initiated|Offered|Requested]");
+        }
+
+        // [TransferProcessEvent] #EDCIDConsumer is transferring an asset #ASSETID from #EDCProvider. Status: [Approved|Confirmed|Declined|Failed|Initiated|Offered|Requested]
+        if (event.getPayload() instanceof TransferProcessEventPayload){
+            message =  String.format("[TransferProcessEvent] #EDCIDConsumer is transferring an asset #ASSETID from #EDCProvider. Status: [Approved|Confirmed|Declined|Failed|Initiated|Offered|Requested]");
+        }
+
+        monitor.info(message);
+
+        /*
         if (event.getPayload() instanceof TransferProcessEventPayload) {
             creatingLog(event);
         }
+
+        if (event.getPayload() instanceof AssetCreated.Payload){
+            auditLoggingManagerService.addLog(new Log("TestId","EDC ID", "timeNow", "Wir testen"));
+        }
+*/
     }
 
     private void creatingLog(Event event){

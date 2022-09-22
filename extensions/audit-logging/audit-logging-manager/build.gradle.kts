@@ -29,7 +29,10 @@ dependencies {
 
     api(project(":extensions:audit-logging:audit-logging-spi"))
 
-    implementation("io.codenotary:immudb4j:0.9.10.2")
+    //implementation("io.codenotary:immudb4j:0.9.10.2")
+
+    implementation("co.elastic.clients:elasticsearch-java:8.4.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
 
     testImplementation(project(":extensions:common:http"))
     //testImplementation(project(":core:defaults"))

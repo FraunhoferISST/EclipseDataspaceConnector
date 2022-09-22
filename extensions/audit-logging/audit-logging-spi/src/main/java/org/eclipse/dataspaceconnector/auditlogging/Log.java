@@ -9,6 +9,7 @@ public class Log implements Serializable {
 
     protected String message;
 
+    public Log(){}
     public Log(String id, String sourceId, String timestamp, String message) {
         this.dataId = id;
         this.sourceId = sourceId;
@@ -16,9 +17,41 @@ public class Log implements Serializable {
         this.message = message;
     }
 
-    public String getUid() {
-        return String.format("%s:%s:%s", dataId,sourceId, timestamp);
+    public String getDataId() {
+        return dataId;
     }
+
+    public void setDataId(String dataId) {
+        this.dataId = dataId;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    //public String getUid() {
+    //    return String.format("%s:%s:%s", dataId,sourceId, timestamp);
+   // }
 
     @Override
     public String toString() {
