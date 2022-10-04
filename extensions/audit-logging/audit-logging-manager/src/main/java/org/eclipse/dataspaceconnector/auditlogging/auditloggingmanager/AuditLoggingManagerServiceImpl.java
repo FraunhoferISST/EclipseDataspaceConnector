@@ -1,3 +1,17 @@
+/*
+ *  Copyright (c) 2022 Fraunhofer Institute for Software and Systems Engineering
+ *
+ *  This program and the accompanying materials are made available under the
+ *  terms of the Apache License, Version 2.0 which is available at
+ *  https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Contributors:
+ *       Fraunhofer Institute for Software and Systems Engineering - initial API and implementation
+ *
+ */
+
 package org.eclipse.dataspaceconnector.auditlogging.auditloggingmanager;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -17,11 +31,12 @@ import org.eclipse.dataspaceconnector.spi.system.configuration.Config;
 import org.elasticsearch.client.RestClient;
 
 import java.io.*;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerService {
    // private ImmuClient immuClient;
-    private Config databaseConfig;
+    private Config elasticConfig;
     private Monitor monitor;
 
     private RestClient restClient;
@@ -30,13 +45,13 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
 
 
     public AuditLoggingManagerServiceImpl(Config conf, Monitor monitor) {
-        this.databaseConfig = conf;
+        this.elasticConfig = conf;
 
         this.monitor = monitor;
 
         // Create the low-level client
         this.restClient = RestClient.builder(
-            new HttpHost("localhost", 9200)).build();
+            new HttpHost(elasticConfig.getString("url"), elasticConfig.getInteger("port"))).build();
 
         // Create the transport with a Jackson mapper
         this.transport = new RestClientTransport(
@@ -47,8 +62,8 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
 
         //Create index on elasticsearch for the logs
         try {
-            if (!client.indices().exists(new ExistsRequest.Builder().index("auditlogging").build()).value()){
-                client.indices().create(c -> c.index("auditlogging"));
+            if (!client.indices().exists(new ExistsRequest.Builder().index(elasticConfig.getString("indexprefix")).build()).value()){
+                client.indices().create(c -> c.index(elasticConfig.getString("indexprefix")));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -62,90 +77,21 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
         IndexResponse response = null;
         try {
             response = client.index(i -> i
-                    .index("auditlogging")
-                    .id("test6")
+                    .index(elasticConfig.getString("indexprefix"))
+                    .id(log.getUid())
                     .document(log)
             );
             monitor.info("Indexed with version " +response.version());
-
-            monitor.info("Try get Document2");
-            GetResponse<Log> response2 = client.get(g -> g
-                            .index("auditlogging")
-                            .id("test6"),
-                    Log.class
-            );
-
-            monitor.info("Object searched" + response2.id());
-            if (response2.found()) {
-                Log product = response2.source();
-                monitor.info("LOG: " + product.toString());
-            } else {
-                monitor.info ("Product not found");
-            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            monitor.severe("Log could not be written to Elastic");
+            monitor.severe("Check if Elasticsearch Server is available");
+            monitor.info(log.toString());
         }
-
-        monitor.info(log.toString());
-        /*immuClient.useDatabase(databaseConfig.getString("db"));
-
-        try {
-            immuClient.set(log.getUid(), logToByte(log));
-        } catch (CorruptedDataException e) {
-            monitor.info(e.getMessage());
-            throw new RuntimeException(e);
-        }*/
     }
 
     @Override
     public List<Log> getAllLogs() {
-
-
-        /*
-        try {
-            List<Log> returnListLogs = new ArrayList<>();
-            var listLogs = immuClient.scan("");
-            listLogs.forEach(x -> {
-                returnListLogs.add(byteToLog(x.getValue()));
-                monitor.info(byteToLog(x.getValue()).toString());
-            });
-            return returnListLogs;
-        } catch (KeyNotFoundException e) {
-            monitor.info(e.getMessage());
-            throw new RuntimeException(e);
-        }*/
         return null;
     }
 
-    private byte[] logToByte(Log log) {
-        /*try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(bos);
-            oos.writeObject(log);
-            oos.flush();
-            return bos.toByteArray();
-        } catch (IOException e) {
-            monitor.info(e.getMessage());
-            throw new RuntimeException(e);
-        }*/
-
-        return null;
-    }
-
-    private Log byteToLog(byte[] pByte) {
-        /*
-        try {
-            ByteArrayInputStream bis = new ByteArrayInputStream(pByte);
-            ObjectInputStream in = new ObjectInputStream(bis);
-
-            return (Log) in.readObject();
-        } catch (IOException e) {
-            monitor.info(e.getMessage());
-            throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
-            monitor.info(e.getMessage());
-            throw new RuntimeException(e);
-        }*/
-        return null;
-    }
 }
