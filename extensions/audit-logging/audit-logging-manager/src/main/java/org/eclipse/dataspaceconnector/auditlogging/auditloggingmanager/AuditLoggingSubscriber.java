@@ -136,7 +136,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
             message = String.format("[ContractNegotiationEvent] %s is negotiating with %s about the asset %s with policy %s. Status: %s",
                     edcHostID,
                     contractNegotiation.getCounterPartyId() + ":" + contractNegotiation.getCounterPartyAddress(), //TODO Check if good
-                    contractNegotiation.getLastContractOffer().getAssetId(),
+                    contractNegotiation.getLastContractOffer().getAsset().getId(),
                     contractNegotiation.getLastContractOffer().getId(),
                     event.getClass().getSimpleName());
         }

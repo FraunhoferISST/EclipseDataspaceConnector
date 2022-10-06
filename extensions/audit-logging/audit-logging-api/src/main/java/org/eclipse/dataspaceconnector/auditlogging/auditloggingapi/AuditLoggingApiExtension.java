@@ -16,8 +16,8 @@
 package org.eclipse.dataspaceconnector.auditlogging.auditloggingapi;
 
 import org.eclipse.dataspaceconnector.auditlogging.AuditLoggingManagerService;
-import org.eclipse.dataspaceconnector.auditlogging.Log;
 import org.eclipse.dataspaceconnector.auditlogging.auditloggingapiconfiguration.AuditLoggingApiConfiguration;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.system.*;
 

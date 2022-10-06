@@ -15,13 +15,14 @@
 package org.eclipse.dataspaceconnector.auditlogging.auditloggingmanager;
 
 import org.eclipse.dataspaceconnector.auditlogging.AuditLoggingManagerService;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Provides;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.store.ContractNegotiationStore;
 import org.eclipse.dataspaceconnector.spi.contract.offer.store.ContractDefinitionStore;
 import org.eclipse.dataspaceconnector.spi.event.EventRouter;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.policy.store.PolicyDefinitionStore;
-import org.eclipse.dataspaceconnector.spi.system.Inject;
-import org.eclipse.dataspaceconnector.spi.system.Provides;
+
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transfer.store.TransferProcessStore;
