@@ -53,3 +53,5 @@ launchers/demo-e2e/edc-config.properties
 .env
 runtime_settings.properties
 generated_backend.tf
+/venv/
+/samples/audit-logging/analyse-tool/analyse-tool/
