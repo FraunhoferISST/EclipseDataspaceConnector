@@ -60,22 +60,25 @@ public class AuditLoggingManagerServiceImpl implements AuditLoggingManagerServic
         // And create the API client
         this.client = new ElasticsearchClient(transport);
 
-        //Create index on elasticsearch for the logs
-        try {
+
+      /*  try {
+            //Create index on elasticsearch for the logs
             if (!client.indices().exists(new ExistsRequest.Builder().index(elasticConfig.getString("indexprefix")).build()).value()){
                 client.indices().create(c -> c.index(elasticConfig.getString("indexprefix")));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        monitor.info("SERVER VERBINDUNG WURDE AUFGEBAUT");
+      */  monitor.info("SERVER VERBINDUNG WURDE AUFGEBAUT");
     }
 
     @Override
     public void addLog(Log log) {
         IndexResponse response = null;
         try {
+            if (!client.indices().exists(new ExistsRequest.Builder().index(elasticConfig.getString("indexprefix")).build()).value()){
+                client.indices().create(c -> c.index(elasticConfig.getString("indexprefix")));
+            }
             response = client.index(i -> i
                     .index(elasticConfig.getString("indexprefix"))
                     .id(log.getUid())

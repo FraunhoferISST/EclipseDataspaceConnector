@@ -26,6 +26,7 @@ services:
       - edc_network
     depends_on:
       - postgresql
+      - elasticsearch
 
   postgresql:
     image: postgres
@@ -43,26 +44,41 @@ services:
     ports:
       - 5432:5432
 
-  immudb:
-    image: codenotary/immudb:latest
-    container_name: immudb
-    ports:
-      - 3322:3322
-      - 8080:8080
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.4.3
+    container_name: logstash
+    restart: always
+    environment:
+      Test: test
     networks:
       - edc_network
-
-
-  file_server_backend:
-    build: ../thirdPartyPrototype/.
-    container_name: file_server
-    ports:
-      - 5000:5000
     volumes:
-      - ./files:/app/files
+      - ./logstash_config/pipeline/:/usr/share/logstash/pipeline/
+
+  elasticsearch:
+    container_name: elastic
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.4.2
+    environment:
+      - ES_JAVA_OPTS = "-Xms2048m -Xmx2048m"
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
 
     networks:
       - edc_network
+    ports:
+      - 9200:9200
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:8.4.2
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elastic:9200
+    networks:
+      - edc_network
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
 
 volumes:
   db:
