@@ -69,6 +69,21 @@ public class AuditLoggingSubscriber implements EventSubscriber {
 
     @Override
     public void on(Event<?> event) {
+        if (event.getPayload() instanceof TransferProcessEventPayload){
+            var transferProcessEvent = transferProcessStore.find(((TransferProcessEventPayload) event.getPayload()).getTransferProcessId());
+            var props = transferProcessEvent.getDataRequest().getDataDestination().getProperties();
+            if (props.containsKey("type")){
+                if (props.get("type").toString().equals("AmazonS3")){
+                    String awsPrettyMsg = String.format("The asset %s was added to the bucket %s at server %s with the key %s.",
+                            transferProcessEvent.getDataRequest().getAssetId(),props.get("bucketName"),props.get("region"),props.get("keyName"));
+                    String awsMsg = String.format("{\"assetID\" : \"%s\" , \"awsID\" : \"%s\",\"type\" : \"created\", \"prettyMessage\" : \"%s\"}",
+                            transferProcessEvent.getDataRequest().getAssetId(),props.get("keyName"),awsPrettyMsg);
+                    Log awsLog = new Log(edcHostID,String.valueOf(event.getAt()),awsMsg);
+                    auditLoggingManagerService.addLog(awsLog);
+                }
+            }
+        }
+
         String message = null;
 
         // [AssetEvent] #EDCID created asset ASSETID
@@ -161,16 +176,6 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         } else {
             monitor.warning("Event couldnt be logged: " + event.getClass().getSimpleName());
         }
-        if (event.getPayload() instanceof TransferProcessEventPayload){
-            var transferProcessEvent = transferProcessStore.find(((TransferProcessEventPayload) event.getPayload()).getTransferProcessId());
-            var props = transferProcessEvent.getDataRequest().getDataDestination().getProperties();
-            if (props.containsKey("type")){
-                if (props.get("type").toString().equals("AmazonS3")){
-                    String awsMsg = String.format("{\"assetID\" : \"%s\" , \"awsID\" : \"%s\",\"type\" : \"created\", \"prettyMessage\" : \"%s\"}",
-                            transferProcessEvent.getDataRequest().getAssetId(),);
-                    Log awsLog = new Log(edcHostID,String.valueOf(event.getAt()),awsMsg);
-                }
-            }
-        }
+
     }
 }

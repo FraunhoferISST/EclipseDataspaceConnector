@@ -62,11 +62,13 @@ services:
       - ES_JAVA_OPTS = "-Xms2048m -Xmx2048m"
       - xpack.security.enabled=false
       - "discovery.type=single-node"
-
+      - logger.level=WARN
     networks:
       - edc_network
     ports:
       - 9200:9200
+    volumes:
+      - esdata:/usr/share/elasticsearch/data:rw
 
   kibana:
     container_name: kibana
@@ -82,4 +84,6 @@ services:
 
 volumes:
   db:
+    driver: local
+  esdata:
     driver: local
