@@ -1,11 +1,18 @@
 from datetime import datetime
 from elasticsearch import Elasticsearch
+from dotenv import load_dotenv
+import os
 
-es = Elasticsearch("http://localhost:9200")
+load_dotenv()  # take environment variables from .env.
 
-es.indices.refresh(index="auditlogging")
+elasticsearchServer = os.getenv('elasticServer')
+elasticsearchIndex = os.getenv("elasticIndex")
 
-resp = es.search(index="auditlogging", query={"match_all": {}})
+es = Elasticsearch(elasticsearchServer)
+
+es.indices.refresh(index=elasticsearchIndex)
+
+resp = es.search(index=elasticIndex, query={"match_all": {}})
 print("Got %d Hits:" % resp['hits']['total']['value'])
 for hit in resp['hits']['hits']:
     message = hit["_source"]["event"]["original"]
