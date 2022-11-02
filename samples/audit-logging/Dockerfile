@@ -7,6 +7,7 @@ RUN apt update && apt install curl -y
 WORKDIR /app
 COPY ./build/libs/audit-logging.jar /app
 COPY ./config.properties /app
+COPY ./edc-vault.properties /app
 
 EXPOSE 8181
 EXPOSE 8182
@@ -29,6 +30,7 @@ ENV EDC_ID="FraunhoferISST"
 
 ENTRYPOINT java \
     -Dedc.fs.config=config.properties \
+    -Dedc.fs.vault=edc-vault.properties \
     -Dids.webhook.address=http://$IDS_WEBHOOK_ADRESS:8282 \
     -Dedc.api.auth.key=$EDC_API_KEY \
     -Dedc.datasource.contractnegotiation.url=jdbc:postgresql://$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DATABASE \

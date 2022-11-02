@@ -46,6 +46,8 @@ dependencies {
     implementation(project(":extensions:control-plane:store:sql:asset-index-sql"))
     implementation(project(":extensions:control-plane:store:sql:policy-store-sql"))
 
+    implementation(project(":extensions:data-plane:data-plane-s3"))
+
 
     //Postgres SQL needed helper modules
     implementation(project(":extensions:common:transaction:transaction-local"))
