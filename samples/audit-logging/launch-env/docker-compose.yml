@@ -52,8 +52,9 @@ services:
       Test: test
     networks:
       - edc_network
-    # volumes:
-    #   - ./logstash_config/pipeline/:/usr/share/logstash/pipeline/
+    volumes:
+      - ./logstash_config/pipeline/:/usr/share/logstash/pipeline/
+      - ./launch-vault/:/launch-vault/
 
   elasticsearch:
     container_name: elastic
@@ -67,8 +68,8 @@ services:
       - edc_network
     ports:
       - 9200:9200
-    # volumes:
-    #   - esdata:/usr/share/elasticsearch/data:rw
+    volumes:
+      - esdata:/usr/share/elasticsearch/data:rw
 
   kibana:
     container_name: kibana

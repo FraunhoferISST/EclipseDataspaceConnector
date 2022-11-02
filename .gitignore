@@ -55,3 +55,4 @@ runtime_settings.properties
 generated_backend.tf
 /venv/
 /samples/audit-logging/analyse-tool/analyse-tool/
+/samples/audit-logging/launch-env/launch-vault/vault.yml
