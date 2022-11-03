@@ -72,14 +72,16 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         if (event.getPayload() instanceof TransferProcessEventPayload){
             var transferProcessEvent = transferProcessStore.find(((TransferProcessEventPayload) event.getPayload()).getTransferProcessId());
             var props = transferProcessEvent.getDataRequest().getDataDestination().getProperties();
-            if (props.containsKey("type")){
-                if (props.get("type").toString().equals("AmazonS3")){
-                    String awsPrettyMsg = String.format("The asset %s was added to the bucket %s at server %s with the key %s.",
-                            transferProcessEvent.getDataRequest().getAssetId(),props.get("bucketName"),props.get("region"),props.get("keyName"));
-                    String awsMsg = String.format("{\"assetID\" : \"%s\" , \"awsID\" : \"%s\",\"type\" : \"created\", \"prettyMessage\" : \"%s\"}",
-                            transferProcessEvent.getDataRequest().getAssetId(),props.get("keyName"),awsPrettyMsg);
-                    Log awsLog = new Log(edcHostID,String.valueOf(event.getAt()),awsMsg);
-                    auditLoggingManagerService.addLog(awsLog);
+            if (event.getClass().getSimpleName().equals("TransferProcessCompleted")) {
+                if (props.containsKey("type")) {
+                    if (props.get("type").toString().equals("AmazonS3")) {
+                        String awsPrettyMsg = String.format("[AWSPut] The asset %s was added to the bucket %s at server %s with the key %s.",
+                                transferProcessEvent.getDataRequest().getAssetId(), props.get("bucketName"), props.get("region"), props.get("keyName"));
+                        String awsMsg = String.format("{\"prettyMessage\" : \"%s\" , \"assetID\" : \"%s\" , \"awsID\" : \"%s\",\"type\" : \"AWSPut\"}",
+                                awsPrettyMsg, transferProcessEvent.getDataRequest().getAssetId(), props.get("keyName"));
+                        Log awsLog = new Log(edcHostID, String.valueOf((int) (event.getAt() / 2)), awsMsg);
+                        auditLoggingManagerService.addLog(awsLog);
+                    }
                 }
             }
         }
@@ -89,7 +91,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         // [AssetEvent] #EDCID created asset ASSETID
         if (event.getPayload() instanceof AssetCreated.Payload) {
             var eventPayload = (AssetEventPayload) event.getPayload();
-            message = String.format("[AssetEvent] %s created asset %s",
+            message = String.format("{\"prettyMessage\": \"[AssetEvent] %s created asset %s}\",\"type\" : \"AssetEvent\"}",
                     edcHostID,
                     eventPayload.getAssetId());
         }
@@ -97,7 +99,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         // [AssetEvent] #EDCID deleted asset ASSETID
         if (event.getPayload() instanceof AssetDeleted.Payload) {
             var eventPayload = (AssetEventPayload) event.getPayload();
-            message = String.format("[AssetEvent] %s deleted asset %s",
+            message = String.format("{\"prettyMessage\": \"[AssetEvent] %s deleted asset %s\",\"type\" : \"AssetEvent\"}",
                     edcHostID,
                     eventPayload.getAssetId());
         }
@@ -105,14 +107,14 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         // [PolicyEvent] #EDCID created policy #POLICYID
         if (event.getPayload() instanceof PolicyDefinitionCreated.Payload) {
             var eventPayload = (PolicyDefinitionEventPayload) event.getPayload();
-            message = String.format("[PolicyEvent] %s created policy %s",
+            message = String.format("{\"prettyMessage\": \"[PolicyEvent] %s created policy %s\",\"type\" : \"PolicyEvent\"}",
                     edcHostID,
                     eventPayload.getPolicyDefinitionId());
         }
         // [PolicyEvent] #EDCID deleted policy #POLICYID
         if (event.getPayload() instanceof PolicyDefinitionDeleted.Payload) {
             var eventPayload = (PolicyDefinitionEventPayload) event.getPayload();
-            message = String.format("[PolicyEvent] %s deleted policy %s",
+            message = String.format("{\"prettyMessage\": \"[PolicyEvent] %s deleted policy %s\",\"type\" : \"PolicyEvent\"}",
                     edcHostID,
                     eventPayload.getPolicyDefinitionId());
         }
@@ -127,8 +129,8 @@ public class AuditLoggingSubscriber implements EventSubscriber {
                     assetId = ele.getOperandRight().toString();
                 }
             }
-            message = String.format("[ContractDefinitionEvent] %s created contractdefinition %s. " +
-                            "With this asset %s is published with accesspolicy %s and usepolicy %s.",
+            message = String.format("{\"prettyMessage\": \"[ContractDefinitionEvent] %s created contractdefinition %s. " +
+                            "With this asset %s is published with accesspolicy %s and usepolicy %s.\",\"type\" : \"ContractDefinitionEvent\"}",
                     edcHostID,
                     eventPayload.getContractDefinitionId(),
                     assetId,
@@ -139,7 +141,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         // [ContractDefinitionEvent] #EDCID deleted contractdefinition #CONTRACTDEFINITIONID.
         if (event.getPayload() instanceof ContractDefinitionDeleted.Payload) {
             var eventPayload = (ContractDefinitionEventPayload) event.getPayload();
-            message = String.format("[ContractDefinitionEvent] %s deleted contractdefinition %s.",
+            message = String.format("{\"prettyMessage\": \"[ContractDefinitionEvent] %s deleted contractdefinition %s.\",\"type\" : \"ContractDefinitionEvent\"}",
                     edcHostID,
                     eventPayload.getContractDefinitionId());
         }
@@ -148,7 +150,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         if (event.getPayload() instanceof ContractNegotiationEventPayload) {
             var eventPayload = (ContractNegotiationEventPayload) event.getPayload();
             var contractNegotiation = contractNegotiationStore.find(eventPayload.getContractNegotiationId());
-            message = String.format("[ContractNegotiationEvent] %s is negotiating with %s about the asset %s with policy %s. Status: %s",
+            message = String.format("{\"prettyMessage\": \"[ContractNegotiationEvent] %s is negotiating with %s about the asset %s with policy %s. Status: %s\",\"type\" : \"ContractNegotiationEvent\"}",
                     edcHostID,
                     contractNegotiation.getCounterPartyId() + ":" + contractNegotiation.getCounterPartyAddress(), //TODO Check if good
                     contractNegotiation.getLastContractOffer().getAsset().getId(),
@@ -160,7 +162,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         if (event.getPayload() instanceof TransferProcessEventPayload) {
             var eventPayload = (TransferProcessEventPayload) event.getPayload();
             var transferProcess = transferProcessStore.find(eventPayload.getTransferProcessId());
-            message = String.format("[TransferProcessEvent] %s is transferring an asset %s to %s. Status: %s",
+            message = String.format("{\"prettyMessage\": \"[TransferProcessEvent] %s is transferring an asset %s to %s. Status: %s\",\"type\" : \"TransferProcessEvent\"}",
                     transferProcess.getDataRequest().getConnectorId() + ":" + transferProcess.getDataRequest().getConnectorAddress(), //TODO Check if this is good
                     transferProcess.getDataRequest().getAssetId(),
                     transferProcess.getDataRequest().getDataDestination().getProperties().get("baseUrl"), //TODO CHECK IF THIS IS GOOD
@@ -176,6 +178,5 @@ public class AuditLoggingSubscriber implements EventSubscriber {
         } else {
             monitor.warning("Event couldnt be logged: " + event.getClass().getSimpleName());
         }
-
     }
 }
