@@ -76,7 +76,7 @@ public class AuditLoggingSubscriber implements EventSubscriber {
                 if (props.containsKey("type")) {
                     if (props.get("type").toString().equals("AmazonS3")) {
                         String awsPrettyMsg = String.format("[AWSPut] The asset %s was added to the bucket %s at server %s with the key %s.",
-                                transferProcessEvent.getDataRequest().getAssetId(), props.get("bucketName"), props.get("region"), props.get("keyName"));
+                                transferProcessEvent.getDataRequest().getContractId(), props.get("bucketName"), props.get("region"), props.get("keyName"));
                         String awsMsg = String.format("{\"prettyMessage\" : \"%s\" , \"assetID\" : \"%s\" , \"awsID\" : \"%s\",\"type\" : \"AWSPut\"}",
                                 awsPrettyMsg, transferProcessEvent.getDataRequest().getAssetId(), props.get("keyName"));
                         Log awsLog = new Log(edcHostID, String.valueOf((int) (event.getAt() / 2)), awsMsg);
