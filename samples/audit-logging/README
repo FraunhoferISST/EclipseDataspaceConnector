@@ -1,0 +1,96 @@
+# Datenverfolgung durch auditieren von Daten #
+
+Dieses Projekt beschäftigt sich mit Datenverfolgung innerhalb von Datenräumen
+und stellt einen Proof of Concept dar, wie eine Möglichkeit besteht eine Datennutzung
+zu verfolgen und zu kontrollieren.
+
+Dieser Proof of Concept basiert auf der Nutzung vom Eclipse Dataspace Connector und der
+Verwendung von AWS S3 Buckets zur Speicherung von Daten. Es werden Informationen innerhalb
+des EDCs als auch vom S3 Bucket in einer Elasticsearch-Instanz zusammengeführt. Aus den 
+zusammengeführten Logs von EDC und AWS S3 Bucket soll damit genauer betrachtet werden, wie
+die Daten durch den Consumer genutzt werden, obwohl der EDC keinen Zugriff mehr auf diese 
+Komponente besitzt.
+
+## Getting Started ## 
+
+### Vorbereitung/Konfigurieren ###
+
+#### AWS S3 Bucket vorbereiten ####
+
+Um Logs aus den AWS S3 Buckets zu erhalten müssen zunächst vorbereitung getroffen werden. Für das
+Zielbucket muss auf dem selben AWS S3 Server ein Bucket erzeugt werden, indem die Logs gespeichert
+werden können. Im nächsten Schritt wird inne 
+
+#### Logstash konfigurieren ####
+
+Die Datei AWSPipeline muss vor der Nutzung an die eigene Nutzung angepasst werden.
+
+```
+    "aws_credentials_file" => "[PATH zum file mit den AWS Credentials. Achtung File muss in den Container gemountet werden]"
+    "bucket" => "[Name des AWS Buckets mit den Logs]"
+    "region" => "[Server Region vom AWS S3 Bucket]"
+    "interval" => "120"
+    "additional_settings" => {
+        "force_path_style" => true
+        "follow_redirects" => false
+           }
+        }
+```
+
+
+In der Credential Datei wird folgendes Format erwartet:
+
+```
+:access_key_id: "[Your accessKey Id]"
+:secret_access_key: "[Your secret access key]"
+```
+
+#### Anaylse Tool vorbereiten ####
+
+Verwendet wurde **Python3.8** bei der Entwicklung.
+
+Das Python Script nutzt verschiedene Bibliothen die zunächst installiert werden müssen. Es wird zudem empfohlen zunächst ein virtuelle Umgebung für die Docker Umgebung zu erstellen und in dieser die Bibliotheken zu installieren.
+
+```
+//Create virtual enviroment mit Name audit-logging
+python3 -m venv audit-logging
+
+//Aktiviere audit-logging
+source analyse-tool/bin/activate
+
+//Install Bibliotheken
+python3 -m pip install elasticsearch
+python3 -m pip install python-dotenv
+```
+
+### Starten und Nutzen des Enviroments ###
+
+Starte das Projekt mit
+
+```
+docker compose up --build
+```
+
+Nutze die AWS S3 Dataplane um die Daten vom Data Provider zum
+Data Consumer zu übertragen.
+
+Verwendung des Skripts:
+
+```
+python3.8 analysetool.py
+```
+
+
+
+## Bekannte Probleme ##
+
+Hier werden Bekannte Probleme/BUgs des PoC aufgeführt und erweitert, sollten Probleme auftauchen
+
+### Duplikation AWS S3 Logs ###
+
+Sollte der Logstash Docker Container neustarten, werden die Logs aus den AWS S3 Buckets erneut
+gepullt und in die Elastic Search Instanz gepusht. Dies führt zu einer Duplikation der AWS S3
+Logdaten. Insbesondere mit der Nutzung von Persistenz für die ElasticSearch Instanz führt dies
+bei jedem neuen Start des Enviroments zu einer Duplizierung der AWS S3 Logs.
+
+Bisher wurde noch keine Lösung für dieses Problem gefunden.
