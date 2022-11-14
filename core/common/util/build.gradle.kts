@@ -22,7 +22,7 @@ val mockitoVersion: String by project
 val okHttpVersion: String by project
 
 dependencies {
-    testImplementation("org.junit-pioneer:junit-pioneer:1.8.0")
+    testImplementation("org.junit-pioneer:junit-pioneer:1.9.0")
 }
 
 publishing {
