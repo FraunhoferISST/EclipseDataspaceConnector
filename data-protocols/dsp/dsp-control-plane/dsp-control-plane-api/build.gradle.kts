@@ -22,6 +22,9 @@ dependencies {
     api(project(":data-protocols:dsp:dsp-core"))
     api(project(":data-protocols:dsp:dsp-spi:dsp-control-plane-spi"))
 
+    api(project(":spi:control-plane:control-plane-spi"))
+    api(project(":core:control-plane:control-plane-aggregate-services"))
+
     api(project(":spi:common:core-spi"))
     api(project(":extensions:common:http"))
 
@@ -31,6 +34,12 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jakarta-jsonp:2.14.2")
 
     implementation(libs.jakarta.rsApi)
+
+    testImplementation(project(":extensions:common:http"))
+    testImplementation(project(":core:common:junit"))
+    testImplementation(project(":core:control-plane:control-plane-core"))
+
+    testImplementation(libs.restAssured)
 }
 
 
