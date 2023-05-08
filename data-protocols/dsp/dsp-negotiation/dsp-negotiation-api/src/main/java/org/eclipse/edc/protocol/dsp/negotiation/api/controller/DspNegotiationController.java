@@ -52,7 +52,6 @@ import java.util.function.BiFunction;
 
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static java.lang.String.format;
-import static org.eclipse.edc.jsonld.spi.Namespaces.DSPACE_SCHEMA;
 import static org.eclipse.edc.protocol.dsp.negotiation.api.NegotiationApiPaths.AGREEMENT;
 import static org.eclipse.edc.protocol.dsp.negotiation.api.NegotiationApiPaths.BASE_PATH;
 import static org.eclipse.edc.protocol.dsp.negotiation.api.NegotiationApiPaths.CONTRACT_OFFER;
@@ -75,8 +74,8 @@ import static org.eclipse.edc.web.spi.exception.ServiceResultHandler.exceptionMa
  * Provides consumer and provider endpoints for the contract negotiation according to the http binding
  * of the dataspace protocol.
  */
-@Consumes({MediaType.APPLICATION_JSON})
-@Produces({MediaType.APPLICATION_JSON})
+@Consumes({ MediaType.APPLICATION_JSON })
+@Produces({ MediaType.APPLICATION_JSON })
 @Path(BASE_PATH)
 public class DspNegotiationController {
 
@@ -116,10 +115,7 @@ public class DspNegotiationController {
 
             throw new UnsupportedOperationException("Currently not supported.");
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.empty(), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.empty(), throwable);
         }
     }
 
@@ -135,7 +131,8 @@ public class DspNegotiationController {
         monitor.debug(() -> "DSP: Incoming ContractRequestMessage for initiating a contract negotiation.");
 
         try {
-            var negotiation = processMessage(token, Optional.empty(), body, DSPACE_NEGOTIATION_CONTRACT_REQUEST_MESSAGE, ContractRequestMessage.class, protocolService::notifyRequested);
+            var negotiation = processMessage(token, Optional.empty(), body, DSPACE_NEGOTIATION_CONTRACT_REQUEST_MESSAGE,
+                    ContractRequestMessage.class, protocolService::notifyRequested);
 
             var result = transformerRegistry.transform(negotiation, JsonObject.class).orElseThrow(failure ->
                     new EdcException(format("Failed to build response: %s", failure.getFailureDetail())));
@@ -145,10 +142,7 @@ public class DspNegotiationController {
 
             return Response.status(200).type(MediaType.APPLICATION_JSON).entity(response).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of("Invalid ProcessId"), throwable); //TODO Check Better ProcessId
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).type(MediaType.APPLICATION_JSON).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.empty(), throwable);
         }
     }
 
@@ -165,13 +159,11 @@ public class DspNegotiationController {
         monitor.debug(() -> format("DSP: Incoming ContractRequestMessage for process %s", id));
 
         try {
-            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_CONTRACT_REQUEST_MESSAGE, ContractRequestMessage.class, protocolService::notifyRequested);
+            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_CONTRACT_REQUEST_MESSAGE,
+                    ContractRequestMessage.class, protocolService::notifyRequested);
             return Response.status(200).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
     }
 
@@ -210,10 +202,7 @@ public class DspNegotiationController {
 
             return Response.status(200).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
     }
 
@@ -230,14 +219,12 @@ public class DspNegotiationController {
         monitor.debug(() -> format("DSP: Incoming ContractAgreementVerificationMessage for process %s", id));
 
         try {
-            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_VERIFICATION_MESSAGE, ContractAgreementVerificationMessage.class, protocolService::notifyVerified);
+            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_VERIFICATION_MESSAGE,
+                    ContractAgreementVerificationMessage.class, protocolService::notifyVerified);
 
             return Response.status(200).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
     }
 
@@ -254,13 +241,11 @@ public class DspNegotiationController {
         monitor.debug(() -> format("DSP: Incoming ContractNegotiationTerminationMessage for process %s", id));
 
         try {
-            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_TERMINATION_MESSAGE, ContractNegotiationTerminationMessage.class, protocolService::notifyTerminated);
+            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_TERMINATION_MESSAGE,
+                    ContractNegotiationTerminationMessage.class, protocolService::notifyTerminated);
             return Response.status(200).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
     }
 
@@ -282,12 +267,8 @@ public class DspNegotiationController {
 
             throw new UnsupportedOperationException("Currently not supported.");
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
-
     }
 
     /**
@@ -303,14 +284,12 @@ public class DspNegotiationController {
         monitor.debug(() -> format("DSP: Incoming ContractAgreementMessage for process %s", id));
 
         try {
-            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_MESSAGE, ContractAgreementMessage.class, protocolService::notifyAgreed);
+            processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_MESSAGE,
+                    ContractAgreementMessage.class, protocolService::notifyAgreed);
 
             return Response.status(200).build();
         } catch (Throwable throwable) {
-            var error = ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
-            var statusCode = error.getString(DSPACE_SCHEMA + "code");
-
-            return Response.status(Integer.valueOf(statusCode)).entity(error).build();
+            return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
     }
 
