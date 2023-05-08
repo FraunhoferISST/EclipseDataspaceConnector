@@ -104,6 +104,7 @@ public class DspNegotiationController {
      *
      * @param id    of contract negotiation.
      * @param token identity token.
+     * @return {@Response} ErrorResponse
      */
     @GET
     @Path("{id}")
@@ -124,6 +125,7 @@ public class DspNegotiationController {
      *
      * @param body  dspace:ContractRequestMessage sent by a consumer.
      * @param token identity token.
+     * @return {@Response} TransferProcess or ErrorResponse
      */
     @POST
     @Path(INITIAL_CONTRACT_REQUEST)
@@ -152,6 +154,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractRequestMessage sent by a consumer.
      * @param token identity token.
+     * @return {@Response} Empty Success Response or ErrorResponse
      */
     @POST
     @Path("{id}" + CONTRACT_REQUEST)
@@ -173,6 +176,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractNegotiationEventMessage sent by consumer or provider.
      * @param token identity token.
+     * @return {@Response} Empty Success Response or ErrorResponse
      */
     @POST
     @Path("{id}" + EVENT)
@@ -212,6 +216,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractAgreementVerificationMessage sent by a consumer.
      * @param token identity token.
+     * @return {@Response} Empty Success Response or ErrorResponse
      */
     @POST
     @Path("{id}" + AGREEMENT + VERIFICATION)
@@ -234,6 +239,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractNegotiationTerminationMessage sent by consumer or provider.
      * @param token identity token.
+     * @return {@Response} Empty Success Response or ErrorResponse
      */
     @POST
     @Path("{id}" + TERMINATION)
@@ -255,6 +261,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractOfferMessage sent by a provider.
      * @param token identity token.
+     * @return {@Response} ErrorResponse
      */
     @POST
     @Path("{id}" + CONTRACT_OFFER)
@@ -277,6 +284,7 @@ public class DspNegotiationController {
      * @param id    of contract negotiation.
      * @param body  dspace:ContractAgreementMessage sent by a provider.
      * @param token identity token.
+     * @return {@Response} Empty Response or ErrorResponse
      */
     @POST
     @Path("{id}" + AGREEMENT)
