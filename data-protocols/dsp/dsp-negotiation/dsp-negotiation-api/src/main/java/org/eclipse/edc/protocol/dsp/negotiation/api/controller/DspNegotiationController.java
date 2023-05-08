@@ -125,7 +125,7 @@ public class DspNegotiationController {
      *
      * @param body  dspace:ContractRequestMessage sent by a consumer.
      * @param token identity token.
-     * @return {@Response} TransferProcess or ErrorResponse
+     * @return {@Response} ContractNegotiation or ErrorResponse
      */
     @POST
     @Path(INITIAL_CONTRACT_REQUEST)
