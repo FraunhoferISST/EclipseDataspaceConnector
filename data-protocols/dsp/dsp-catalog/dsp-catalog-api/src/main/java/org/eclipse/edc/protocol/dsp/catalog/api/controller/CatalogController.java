@@ -22,10 +22,12 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.edc.catalog.spi.Catalog;
 import org.eclipse.edc.catalog.spi.CatalogRequestMessage;
 import org.eclipse.edc.connector.spi.catalog.CatalogProtocolService;
 import org.eclipse.edc.jsonld.spi.JsonLd;
+import org.eclipse.edc.protocol.dsp.util.ErrorUtil;
 import org.eclipse.edc.spi.EdcException;
 import org.eclipse.edc.spi.iam.IdentityService;
 import org.eclipse.edc.spi.iam.TokenRepresentation;
@@ -35,11 +37,13 @@ import org.eclipse.edc.web.spi.exception.AuthenticationFailedException;
 import org.eclipse.edc.web.spi.exception.InvalidRequestException;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static jakarta.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static java.lang.String.format;
 import static org.eclipse.edc.protocol.dsp.catalog.api.CatalogApiPaths.BASE_PATH;
 import static org.eclipse.edc.protocol.dsp.catalog.api.CatalogApiPaths.CATALOG_REQUEST;
+import static org.eclipse.edc.protocol.dsp.catalog.api.DspCatalogTypeNames.DSPACE_CATALOG_ERROR;
 import static org.eclipse.edc.protocol.dsp.catalog.transform.DspCatalogPropertyAndTypeNames.DSPACE_CATALOG_REQUEST_TYPE;
 import static org.eclipse.edc.protocol.dsp.transform.util.TypeUtil.isOfExpectedType;
 import static org.eclipse.edc.web.spi.exception.ServiceResultHandler.exceptionMapper;
@@ -74,39 +78,46 @@ public class CatalogController {
 
     @POST
     @Path(CATALOG_REQUEST)
-    public Map<String, Object> getCatalog(JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token) {
+    public Response getCatalog(JsonObject jsonObject, @HeaderParam(AUTHORIZATION) String token) {
         monitor.debug(() -> "DSP: Incoming catalog request.");
-        
-        var tokenRepresentation = TokenRepresentation.Builder.newInstance()
-                .token(token)
-                .build();
 
-        var claimToken = identityService.verifyJwtToken(tokenRepresentation, dspCallbackAddress)
-                .orElseThrow(failure -> new AuthenticationFailedException());
+        try {
+            var tokenRepresentation = TokenRepresentation.Builder.newInstance()
+                    .token(token)
+                    .build();
 
-        var expanded = jsonLdService.expand(jsonObject);
-        if (expanded.failed()) {
-            throw new InvalidRequestException(expanded.getFailureDetail());
+            var claimToken = identityService.verifyJwtToken(tokenRepresentation, dspCallbackAddress)
+                    .orElseThrow(failure -> new AuthenticationFailedException());
+
+            var expanded = jsonLdService.expand(jsonObject);
+            if (expanded.failed()) {
+                throw new InvalidRequestException(expanded.getFailureDetail());
+            }
+            var expandedJson = expanded.getContent();
+            if (!isOfExpectedType(expandedJson, DSPACE_CATALOG_REQUEST_TYPE)) {
+                throw new InvalidRequestException(format("Request body was not of expected type: %s", DSPACE_CATALOG_REQUEST_TYPE));
+            }
+
+            var message = transformerRegistry.transform(expandedJson, CatalogRequestMessage.class)
+                    .orElseThrow(failure -> new InvalidRequestException(format("Request body was malformed: %s", failure.getFailureDetail())));
+
+            var catalog = service.getCatalog(message, claimToken)
+                    .orElseThrow(exceptionMapper(Catalog.class));
+
+            var catalogJson = transformerRegistry.transform(catalog, JsonObject.class)
+                    .orElseThrow(failure -> new EdcException(format("Failed to build response: %s", failure.getFailureDetail())));
+
+            var compacted = jsonLdService.compact(catalogJson);
+            if (compacted.failed()) {
+                throw new InvalidRequestException(compacted.getFailureDetail());
+            }
+            var result = mapper.convertValue(compacted.getContent(), Map.class);
+
+            return Response.status(200).entity(result).build();
+        } catch (Throwable throwable) {
+            return ErrorUtil.createErrorResponse(DSPACE_CATALOG_ERROR, Optional.empty(), throwable);
         }
-        var expandedJson = expanded.getContent();
-        if (!isOfExpectedType(expandedJson, DSPACE_CATALOG_REQUEST_TYPE)) {
-            throw new InvalidRequestException(format("Request body was not of expected type: %s", DSPACE_CATALOG_REQUEST_TYPE));
-        }
 
-        var message = transformerRegistry.transform(expandedJson, CatalogRequestMessage.class)
-                .orElseThrow(failure -> new InvalidRequestException(format("Request body was malformed: %s", failure.getFailureDetail())));
-
-        var catalog = service.getCatalog(message, claimToken)
-                .orElseThrow(exceptionMapper(Catalog.class));
-
-        var catalogJson = transformerRegistry.transform(catalog, JsonObject.class)
-                .orElseThrow(failure -> new EdcException(format("Failed to build response: %s", failure.getFailureDetail())));
-
-        var compacted = jsonLdService.compact(catalogJson);
-        if (compacted.failed()) {
-            throw new InvalidRequestException(compacted.getFailureDetail());
-        }
-        return mapper.convertValue(compacted.getContent(), Map.class);
     }
 
 }
