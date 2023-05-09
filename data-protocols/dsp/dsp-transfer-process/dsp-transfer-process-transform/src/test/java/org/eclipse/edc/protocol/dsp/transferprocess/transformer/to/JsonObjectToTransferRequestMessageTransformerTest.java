@@ -38,8 +38,6 @@ import static org.mockito.Mockito.verify;
 
 class JsonObjectToTransferRequestMessageTransformerTest {
 
-    private final String processId = "TestProcessId";
-
     private final String callbackAddress = "https://callback.de";
 
     private final String contractId = "TestContreactID";
