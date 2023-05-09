@@ -142,7 +142,7 @@ public class DspNegotiationController {
             var response =  compactResult.map(jo -> mapper.convertValue(jo, Map.class))
                     .orElseThrow(f -> new InvalidRequestException(f.getFailureDetail()));
 
-            return Response.status(200).type(MediaType.APPLICATION_JSON).entity(response).build();
+            return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON).entity(response).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.empty(), throwable);
         }
@@ -164,7 +164,7 @@ public class DspNegotiationController {
         try {
             processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_CONTRACT_REQUEST_MESSAGE,
                     ContractRequestMessage.class, protocolService::notifyRequested);
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
@@ -204,7 +204,7 @@ public class DspNegotiationController {
                     throw new InvalidRequestException(String.format("Cannot process dspace:ContractNegotiationEventMessage with unexpected type %s.", message.getType()));
             }
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
@@ -227,7 +227,7 @@ public class DspNegotiationController {
             processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_VERIFICATION_MESSAGE,
                     ContractAgreementVerificationMessage.class, protocolService::notifyVerified);
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
@@ -249,7 +249,7 @@ public class DspNegotiationController {
         try {
             processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_TERMINATION_MESSAGE,
                     ContractNegotiationTerminationMessage.class, protocolService::notifyTerminated);
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }
@@ -295,7 +295,7 @@ public class DspNegotiationController {
             processMessage(token, Optional.of(id), body, DSPACE_NEGOTIATION_AGREEMENT_MESSAGE,
                     ContractAgreementMessage.class, protocolService::notifyAgreed);
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CONTRACT_NEGOTIATION_ERROR, Optional.of(id), throwable);
         }

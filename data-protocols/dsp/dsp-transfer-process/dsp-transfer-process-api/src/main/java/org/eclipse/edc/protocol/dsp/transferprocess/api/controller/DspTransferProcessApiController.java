@@ -131,7 +131,7 @@ public class DspTransferProcessApiController {
             var result = compacted.map(jo -> mapper.convertValue(jo, Map.class))
                     .orElseThrow(f -> new InvalidRequestException(f.getFailureDetail()));
 
-            return Response.status(200).entity(result).build();
+            return Response.status(Response.Status.OK).entity(result).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_TRANSFER_PROCESS_ERROR, Optional.empty(), throwable);
         }
@@ -152,7 +152,7 @@ public class DspTransferProcessApiController {
         try {
             handleMessage(jsonObject, Optional.of(id), token, DSPACE_TRANSFER_START_TYPE, TransferStartMessage.class, protocolService::notifyStarted);
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_TRANSFER_PROCESS_ERROR, Optional.of(id), throwable);
         }
@@ -172,7 +172,7 @@ public class DspTransferProcessApiController {
         try {
             handleMessage(jsonObject, Optional.of(id), token, DSPACE_TRANSFER_COMPLETION_TYPE, TransferCompletionMessage.class, protocolService::notifyCompleted);
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_TRANSFER_PROCESS_ERROR, Optional.of(id), throwable);
         }
@@ -192,7 +192,7 @@ public class DspTransferProcessApiController {
         try {
             handleMessage(jsonObject, Optional.of(id), token, DSPACE_TRANSFER_TERMINATION_TYPE, TransferTerminationMessage.class, protocolService::notifyTerminated);
 
-            return Response.status(200).build();
+            return Response.status(Response.Status.OK).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_TRANSFER_PROCESS_ERROR, Optional.of(id), throwable);
         }

@@ -113,7 +113,7 @@ public class CatalogController {
             }
             var result = mapper.convertValue(compacted.getContent(), Map.class);
 
-            return Response.status(200).entity(result).build();
+            return Response.status(Response.Status.OK).entity(result).build();
         } catch (Throwable throwable) {
             return ErrorUtil.createErrorResponse(DSPACE_CATALOG_ERROR, Optional.empty(), throwable);
         }
